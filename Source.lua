@@ -3,9 +3,11 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.6.1"
+CursedPaint.Version = "0.6.2"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
+CursedPaint._fontFaceCache = {}
+CursedPaint.Font = "FingerPaint"
 CursedPaint.Motion = {
 	Enabled = true,
 	Speed = 1,
@@ -218,6 +220,89 @@ local function resolveEnumFont(value)
 	return nil
 end
 
+local FONT_FAMILIES = {
+	FingerPaint = "rbxasset://fonts/families/FingerPaint.json",
+	["Finger Paint"] = "rbxasset://fonts/families/FingerPaint.json",
+	PatrickHand = "rbxasset://fonts/families/PatrickHand.json",
+	["Patrick Hand"] = "rbxasset://fonts/families/PatrickHand.json",
+	PermanentMarker = "rbxasset://fonts/families/PermanentMarker.json",
+	["Permanent Marker"] = "rbxasset://fonts/families/PermanentMarker.json",
+}
+
+local function fontFamilyPath(value)
+	local text = tostring(value or "")
+	if text == "" then
+		return nil
+	end
+
+	if text:match("^rbxasset://") or text:match("^rbxassetid://") then
+		return text
+	end
+
+	if text:match("^%d+$") then
+		return "rbxassetid://" .. text
+	end
+
+	if FONT_FAMILIES[text] then
+		return FONT_FAMILIES[text]
+	end
+
+	local compact = text:gsub("[%s_%-]+", "")
+	return FONT_FAMILIES[compact]
+end
+
+local function resolveFontFace(value)
+	local kind = kindOf(value)
+	if kind == "Font" then
+		return value
+	end
+
+	if kind == "EnumItem" then
+		local ok, face = pcall(function()
+			if Font and Font.fromEnum then
+				return Font.fromEnum(value)
+			end
+			return nil
+		end)
+		return ok and face or nil
+	end
+
+	local path = fontFamilyPath(value)
+	if not path then
+		return nil
+	end
+
+	if CursedPaint._fontFaceCache[path] then
+		return CursedPaint._fontFaceCache[path]
+	end
+
+	local ok, face = pcall(function()
+		if not Font then
+			return nil
+		end
+		return Font.new(path, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+	end)
+
+	if ok and face then
+		CursedPaint._fontFaceCache[path] = face
+		return face
+	end
+
+	local okSimple, simpleFace = pcall(function()
+		if not Font then
+			return nil
+		end
+		return Font.new(path)
+	end)
+
+	if okSimple and simpleFace then
+		CursedPaint._fontFaceCache[path] = simpleFace
+		return simpleFace
+	end
+
+	return nil
+end
+
 local function handFont()
 	local configured = resolveEnumFont(CursedPaint.Font)
 	if configured then
@@ -245,13 +330,19 @@ end
 
 local function applyHandFont(instance)
 	local font = handFont()
-	instance.Font = font
+	pcall(function()
+		instance.Font = font
+	end)
 
-	if CursedPaint.FontFace then
+	local face = resolveFontFace(CursedPaint.FontFace)
+		or resolveFontFace(CursedPaint.Font)
+		or resolveFontFace("FingerPaint")
+		or resolveFontFace(font)
+
+	if face then
 		local ok = pcall(function()
-			instance.FontFace = CursedPaint.FontFace
+			instance.FontFace = face
 		end)
-
 		if ok then
 			return
 		end
@@ -279,6 +370,10 @@ local function make(className, props, children)
 
 	for _, child in ipairs(children or {}) do
 		child.Parent = instance
+	end
+
+	if className == "TextLabel" or className == "TextButton" or className == "TextBox" then
+		applyHandFont(instance)
 	end
 
 	if props and props.Parent then
@@ -1162,8 +1257,8 @@ function Window:_disconnectAll()
 end
 
 function CursedPaint:SetFont(font, fontFace)
-	CursedPaint.Font = resolveEnumFont(font) or font
-	CursedPaint.FontFace = fontFace
+	CursedPaint.Font = resolveEnumFont(font) or font or "FingerPaint"
+	CursedPaint.FontFace = resolveFontFace(fontFace) or fontFace
 	return CursedPaint.Font
 end
 

@@ -36,6 +36,16 @@ Options:
 - `ConfigFolder`: folder used by `SaveConfig` when file APIs exist.
 - `Font`: font enum or enum name string.
 
+Font names:
+
+```lua
+Window:SetFont("FingerPaint")
+Window:SetFont("PatrickHand")
+Window:SetFont("rbxasset://fonts/families/FingerPaint.json")
+```
+
+CursedPaint tries `FontFace` first, then falls back to Roblox enum fonts if the client cannot load that family.
+
 Aliases:
 
 ```lua

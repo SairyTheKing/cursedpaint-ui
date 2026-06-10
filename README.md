@@ -56,6 +56,7 @@ Main:AddSlider({
 ## Features
 
 - Bigger animated `Brawl` default theme, plus `Dark`, `Paper`, `Smoke`, `Blood`, `Void`, `Forest`, and `Candy`.
+- FingerPaint font family attempt on every text object, with Roblox font fallback.
 - Draggable, minimizable, closable, toggleable, and resizable window.
 - Animated opening, tab switching, toasts, rows, buttons, and progress bars.
 - Tabs, sections, labels, paragraphs, images, banners, quests, and progress bars.
