@@ -1,31 +1,58 @@
 -- CursedPaint UI
--- Flat FingerPaint Roblox UI library with a translucent paper/menu style.
+-- Animated FingerPaint Roblox UI library with a translucent sketch-menu style.
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.5.0"
+CursedPaint.Version = "0.6.0"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
+CursedPaint.Motion = {
+	Enabled = true,
+	Speed = 1,
+}
 
 CursedPaint.Themes = {
+	Brawl = {
+		Backdrop = Color3.fromRGB(35, 35, 38),
+		Left = Color3.fromRGB(232, 226, 176),
+		Panel = Color3.fromRGB(238, 238, 231),
+		PanelAlt = Color3.fromRGB(204, 205, 199),
+		Text = Color3.fromRGB(13, 13, 13),
+		Muted = Color3.fromRGB(47, 47, 47),
+		Ink = Color3.fromRGB(0, 0, 0),
+		SelectedTop = Color3.fromRGB(255, 246, 143),
+		SelectedBottom = Color3.fromRGB(213, 93, 58),
+		Bar = Color3.fromRGB(88, 88, 86),
+		BarFill = Color3.fromRGB(18, 203, 245),
+		Good = Color3.fromRGB(69, 190, 102),
+		Bad = Color3.fromRGB(220, 67, 70),
+		PanelTransparency = 0.16,
+		RowTransparency = 0.08,
+		TextureTransparency = 0.8,
+		GlowTransparency = 0.78,
+		Radius = 9,
+		StrokeThickness = 1.8,
+	},
 	Dark = {
-		Backdrop = Color3.fromRGB(11, 12, 16),
-		Left = Color3.fromRGB(17, 19, 26),
-		Panel = Color3.fromRGB(27, 29, 38),
-		PanelAlt = Color3.fromRGB(37, 40, 51),
+		Backdrop = Color3.fromRGB(10, 11, 15),
+		Left = Color3.fromRGB(18, 19, 24),
+		Panel = Color3.fromRGB(29, 31, 39),
+		PanelAlt = Color3.fromRGB(42, 44, 54),
 		Text = Color3.fromRGB(246, 241, 232),
 		Muted = Color3.fromRGB(170, 164, 154),
 		Ink = Color3.fromRGB(2, 3, 6),
-		SelectedTop = Color3.fromRGB(74, 79, 102),
-		SelectedBottom = Color3.fromRGB(132, 82, 126),
-		Bar = Color3.fromRGB(57, 62, 78),
-		BarFill = Color3.fromRGB(26, 203, 246),
+		SelectedTop = Color3.fromRGB(79, 84, 107),
+		SelectedBottom = Color3.fromRGB(151, 86, 123),
+		Bar = Color3.fromRGB(62, 67, 84),
+		BarFill = Color3.fromRGB(18, 203, 245),
 		Good = Color3.fromRGB(76, 220, 128),
 		Bad = Color3.fromRGB(238, 81, 90),
 		PanelTransparency = 0.02,
 		RowTransparency = 0.04,
-		Radius = 10,
-		StrokeThickness = 1.4,
+		TextureTransparency = 0.84,
+		GlowTransparency = 0.76,
+		Radius = 11,
+		StrokeThickness = 1.5,
 	},
 	Paper = {
 		Backdrop = Color3.fromRGB(226, 224, 215),
@@ -161,7 +188,7 @@ local function cloneTheme(theme)
 end
 
 local function getTheme(name)
-	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.Dark or CursedPaint.Themes.Paper)
+	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.Brawl or CursedPaint.Themes.Dark or CursedPaint.Themes.Paper)
 end
 
 local function themeNames()
@@ -317,11 +344,51 @@ local function grid(parent, cellSize, gap)
 end
 
 local function tween(instance, duration, goal)
+	local speed = CursedPaint.Motion and tonumber(CursedPaint.Motion.Speed) or 1
+	if speed <= 0 then
+		speed = 1
+	end
 	local tweenService = service("TweenService")
-	local info = TweenInfo.new(duration or 0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local info = TweenInfo.new((duration or 0.12) / speed, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 	local created = tweenService:Create(instance, info, goal)
 	created:Play()
 	return created
+end
+
+local function tweenStyle(instance, duration, goal, style, direction)
+	local speed = CursedPaint.Motion and tonumber(CursedPaint.Motion.Speed) or 1
+	if speed <= 0 then
+		speed = 1
+	end
+	local tweenService = service("TweenService")
+	local info = TweenInfo.new(
+		(duration or 0.12) / speed,
+		style or Enum.EasingStyle.Quad,
+		direction or Enum.EasingDirection.Out
+	)
+	local created = tweenService:Create(instance, info, goal)
+	created:Play()
+	return created
+end
+
+local function motionEnabled()
+	return not CursedPaint.Motion or CursedPaint.Motion.Enabled ~= false
+end
+
+local function addScale(parent, scale)
+	return make("UIScale", {
+		Scale = scale or 1,
+		Parent = parent,
+	})
+end
+
+local function popScale(scaleObject, amount)
+	if not motionEnabled() or not scaleObject then
+		return
+	end
+
+	scaleObject.Scale = amount or 0.97
+	tweenStyle(scaleObject, 0.18, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 end
 
 local function call(callback, ...)
@@ -574,13 +641,32 @@ local function makeButton(parent, text, theme, width)
 	applyHandFont(button)
 	corner(button, theme)
 	stroke(button, theme, 2)
+	local scale = addScale(button, 1)
 
 	button.MouseEnter:Connect(function()
 		tween(button, 0.1, { BackgroundTransparency = 0.02 })
+		if motionEnabled() then
+			tweenStyle(scale, 0.12, { Scale = 1.035 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+		end
 	end)
 
 	button.MouseLeave:Connect(function()
 		tween(button, 0.1, { BackgroundTransparency = theme.RowTransparency })
+		if motionEnabled() then
+			tween(scale, 0.1, { Scale = 1 })
+		end
+	end)
+
+	button.MouseButton1Down:Connect(function()
+		if motionEnabled() then
+			tween(scale, 0.06, { Scale = 0.95 })
+		end
+	end)
+
+	button.MouseButton1Up:Connect(function()
+		if motionEnabled() then
+			tweenStyle(scale, 0.12, { Scale = 1.02 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+		end
 	end)
 
 	return button
@@ -610,6 +696,15 @@ local function createProgressBar(parent, theme, yOffset)
 	return track, fill
 end
 
+local function setProgressFill(fill, alpha, animated)
+	local size = UDim2.fromScale(math.clamp(alpha or 0, 0, 1), 1)
+	if animated ~= false and motionEnabled() then
+		tweenStyle(fill, 0.18, { Size = size }, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+	else
+		fill.Size = size
+	end
+end
+
 local function rowTitle(parent, title, theme, y, rightWidth)
 	local label = make("TextLabel", {
 		BackgroundTransparency = 1,
@@ -633,7 +728,7 @@ function CursedPaint:CreateWindow(options)
 		CursedPaint.FontFace = options.FontFace
 	end
 
-	local themeName = options.Theme or "Dark"
+	local themeName = options.Theme or "Brawl"
 	local theme = getTheme(themeName)
 	local parent = options.Parent or resolveParent()
 	assert(parent, "CursedPaint UI could not find a UI parent.")
@@ -654,16 +749,36 @@ function CursedPaint:CreateWindow(options)
 		BackgroundTransparency = theme.PanelTransparency,
 		BorderSizePixel = 0,
 		Position = options.Position or UDim2.fromScale(0.5, 0.5),
-		Size = options.Size or UDim2.fromOffset(690, 395),
+		Size = options.Size or UDim2.fromOffset(780, 460),
 		ZIndex = 1,
 		Parent = gui,
 	})
+	local rootScale = addScale(root, 1)
 	corner(root, theme)
 	stroke(root, theme, 2)
 
+	local accentGlow = make("Frame", {
+		BackgroundColor3 = theme.BarFill,
+		BackgroundTransparency = theme.GlowTransparency or 0.82,
+		BorderSizePixel = 0,
+		Position = UDim2.fromOffset(8, 8),
+		Size = UDim2.new(1, -16, 1, -16),
+		ZIndex = 1,
+		Parent = root,
+	})
+	corner(accentGlow, theme, math.max((theme.Radius or 7) - 2, 2))
+	local accentGlowGradient = make("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, theme.BarFill),
+			ColorSequenceKeypoint.new(1, theme.SelectedBottom),
+		}),
+		Rotation = 35,
+		Parent = accentGlow,
+	})
+
 	local texture = make("Frame", {
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BackgroundTransparency = 0.86,
+		BackgroundTransparency = theme.TextureTransparency or 0.86,
 		BorderSizePixel = 0,
 		Position = UDim2.fromOffset(4, 4),
 		Size = UDim2.new(1, -8, 1, -8),
@@ -688,8 +803,8 @@ function CursedPaint:CreateWindow(options)
 		BackgroundColor3 = theme.Left,
 		BackgroundTransparency = 0.12,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(8, 8),
-		Size = UDim2.new(0, 176, 1, -16),
+		Position = UDim2.fromOffset(10, 10),
+		Size = UDim2.new(0, 190, 1, -20),
 		ZIndex = 3,
 		Parent = root,
 	})
@@ -704,12 +819,12 @@ function CursedPaint:CreateWindow(options)
 			Text = tostring(options.Title or "CursedPaint"),
 			TextColor3 = theme.Text,
 			Position = UDim2.fromOffset(9, 5),
-			Size = UDim2.new(1, -18, 0, 28),
+			Size = UDim2.new(1, -18, 0, 34),
 			ZIndex = 5,
 			Parent = left,
 		})
-		setHandText(titleLabel, 21, Enum.TextXAlignment.Center)
-		tabsTop = 42
+		setHandText(titleLabel, 24, Enum.TextXAlignment.Center)
+		tabsTop = 48
 	end
 
 	local tabs = make("ScrollingFrame", {
@@ -729,8 +844,8 @@ function CursedPaint:CreateWindow(options)
 	local content = make("Frame", {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(194, 8),
-		Size = UDim2.new(1, -202, 1, -16),
+		Position = UDim2.fromOffset(212, 10),
+		Size = UDim2.new(1, -222, 1, -20),
 		ZIndex = 3,
 		Parent = root,
 	})
@@ -740,7 +855,7 @@ function CursedPaint:CreateWindow(options)
 		ImageTransparency = options.SideImageTransparency or options.PortraitTransparency or 0.62,
 		Position = UDim2.new(1, -4, 0, 0),
 		ScaleType = Enum.ScaleType.Crop,
-		Size = UDim2.new(0, options.SideImageWidth or 155, 1, 0),
+		Size = UDim2.new(0, options.SideImageWidth or 190, 1, 0),
 		ZIndex = 3,
 	})
 	if sideImage then
@@ -748,16 +863,36 @@ function CursedPaint:CreateWindow(options)
 	end
 
 	local bottomStrip = make("Frame", {
-		BackgroundColor3 = theme.Bar,
-		BackgroundTransparency = 0.64,
+		BackgroundColor3 = theme.BarFill,
+		BackgroundTransparency = 0.18,
 		BorderSizePixel = 0,
-		Position = UDim2.new(0, 8, 1, -18),
-		Size = UDim2.new(1, -16, 0, 10),
-		ZIndex = 2,
+		Position = UDim2.new(0, 10, 1, -25),
+		Size = UDim2.new(1, -20, 0, 16),
+		ZIndex = 4,
 		Parent = root,
 	})
 	corner(bottomStrip, theme, 5)
 	stroke(bottomStrip, theme, 1)
+	local bottomGradient = make("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, theme.BarFill),
+			ColorSequenceKeypoint.new(0.55, theme.SelectedTop),
+			ColorSequenceKeypoint.new(1, theme.BarFill),
+		}),
+		Rotation = 0,
+		Parent = bottomStrip,
+	})
+
+	local topStrip = make("Frame", {
+		BackgroundColor3 = theme.BarFill,
+		BackgroundTransparency = 0.12,
+		BorderSizePixel = 0,
+		Position = UDim2.fromOffset(14, 8),
+		Size = UDim2.new(1, -28, 0, 4),
+		ZIndex = 5,
+		Parent = root,
+	})
+	corner(topStrip, theme, 3)
 
 	local close = makeButton(root, "X", theme, 28)
 	close.Position = UDim2.new(1, -38, 0, 10)
@@ -786,7 +921,7 @@ function CursedPaint:CreateWindow(options)
 	local toastLayout = list(toastHolder, 8)
 	toastLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 
-	local minSize = options.MinSize or Vector2.new(480, 300)
+	local minSize = options.MinSize or Vector2.new(580, 350)
 	if kindOf(minSize) == "UDim2" then
 		minSize = Vector2.new(minSize.X.Offset, minSize.Y.Offset)
 	end
@@ -794,6 +929,9 @@ function CursedPaint:CreateWindow(options)
 	local self = setmetatable({
 		ScreenGui = gui,
 		Root = root,
+		RootScale = rootScale,
+		AccentGlow = accentGlow,
+		AccentGlowGradient = accentGlowGradient,
 		Texture = texture,
 		BackgroundImage = backgroundImage,
 		Left = left,
@@ -802,6 +940,8 @@ function CursedPaint:CreateWindow(options)
 		Content = content,
 		SideImage = sideImage,
 		BottomStrip = bottomStrip,
+		BottomGradient = bottomGradient,
+		TopStrip = topStrip,
 		ResizeGrip = resizeGrip,
 		ToastHolder = toastHolder,
 		ThemeName = themeName,
@@ -822,7 +962,13 @@ function CursedPaint:CreateWindow(options)
 	self:_bindTheme(function(nextTheme)
 		root.BackgroundColor3 = nextTheme.Backdrop
 		root.BackgroundTransparency = nextTheme.PanelTransparency
-		texture.BackgroundTransparency = 0.86
+		accentGlow.BackgroundColor3 = nextTheme.BarFill
+		accentGlow.BackgroundTransparency = nextTheme.GlowTransparency or 0.82
+		accentGlowGradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, nextTheme.BarFill),
+			ColorSequenceKeypoint.new(1, nextTheme.SelectedBottom),
+		})
+		texture.BackgroundTransparency = nextTheme.TextureTransparency or 0.86
 		if backgroundImage then
 			backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.72
 			updateCorner(backgroundImage, nextTheme, math.max((nextTheme.Radius or 7) - 3, 2))
@@ -835,7 +981,13 @@ function CursedPaint:CreateWindow(options)
 			updateCorner(sideImage, nextTheme, math.max((nextTheme.Radius or 7) - 2, 2))
 		end
 		tabs.ScrollBarImageColor3 = nextTheme.Ink
-		bottomStrip.BackgroundColor3 = nextTheme.Bar
+		bottomStrip.BackgroundColor3 = nextTheme.BarFill
+		topStrip.BackgroundColor3 = nextTheme.BarFill
+		bottomGradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, nextTheme.BarFill),
+			ColorSequenceKeypoint.new(0.55, nextTheme.SelectedTop),
+			ColorSequenceKeypoint.new(1, nextTheme.BarFill),
+		})
 		close.BackgroundColor3 = nextTheme.Panel
 		close.BackgroundTransparency = nextTheme.RowTransparency
 		close.TextColor3 = nextTheme.Text
@@ -850,6 +1002,7 @@ function CursedPaint:CreateWindow(options)
 			updateCorner(resizeGrip, nextTheme)
 		end
 		updateStroke(root, nextTheme)
+		updateCorner(accentGlow, nextTheme, math.max((nextTheme.Radius or 7) - 2, 2))
 		updateStroke(texture, nextTheme)
 		updateStroke(left, nextTheme)
 		updateStroke(bottomStrip, nextTheme)
@@ -859,6 +1012,7 @@ function CursedPaint:CreateWindow(options)
 		updateCorner(texture, nextTheme, math.max((nextTheme.Radius or 7) - 3, 2))
 		updateCorner(left, nextTheme, math.max((nextTheme.Radius or 7) - 2, 2))
 		updateCorner(bottomStrip, nextTheme, 5)
+		updateCorner(topStrip, nextTheme, 3)
 		updateCorner(close, nextTheme)
 		updateCorner(minimize, nextTheme)
 	end)
@@ -874,6 +1028,21 @@ function CursedPaint:CreateWindow(options)
 	self:_makeDraggable(root, root)
 	if resizeGrip then
 		self:_makeResizable(resizeGrip, root, self._minSize)
+	end
+
+	if options.Animated ~= false and motionEnabled() then
+		rootScale.Scale = 0.92
+		root.Rotation = -1
+		root.BackgroundTransparency = 1
+		task.defer(function()
+			if root.Parent then
+				tweenStyle(rootScale, 0.34, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+				tweenStyle(root, 0.24, {
+					BackgroundTransparency = self.Theme.PanelTransparency,
+					Rotation = 0,
+				}, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+			end
+		end)
 	end
 
 	local userInput = service("UserInputService")
@@ -917,6 +1086,18 @@ function CursedPaint:SetFont(font, fontFace)
 	return CursedPaint.Font
 end
 
+function CursedPaint:SetMotion(enabled, speed)
+	if type(enabled) == "table" then
+		CursedPaint.Motion.Enabled = enabled.Enabled ~= false
+		CursedPaint.Motion.Speed = tonumber(enabled.Speed) or CursedPaint.Motion.Speed or 1
+	else
+		CursedPaint.Motion.Enabled = enabled ~= false
+		CursedPaint.Motion.Speed = tonumber(speed) or CursedPaint.Motion.Speed or 1
+	end
+
+	return CursedPaint.Motion
+end
+
 function Window:SetFont(font, fontFace)
 	CursedPaint:SetFont(font, fontFace)
 
@@ -927,6 +1108,10 @@ function Window:SetFont(font, fontFace)
 	end
 
 	return true
+end
+
+function Window:SetMotion(enabled, speed)
+	return CursedPaint:SetMotion(enabled, speed)
 end
 
 function CursedPaint:GetPlaceholderImage()
@@ -1038,7 +1223,27 @@ end
 
 function Window:SetVisible(visible)
 	self._visible = visible == true
-	self.Root.Visible = self._visible
+	if self._visible then
+		self.Root.Visible = true
+		if self.RootScale and motionEnabled() then
+			self.RootScale.Scale = 0.96
+			self.Root.BackgroundTransparency = math.min((self.Theme.PanelTransparency or 0) + 0.25, 1)
+			tweenStyle(self.RootScale, 0.2, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			tween(self.Root, 0.16, { BackgroundTransparency = self.Theme.PanelTransparency })
+		end
+	else
+		if self.RootScale and motionEnabled() then
+			tween(self.RootScale, 0.11, { Scale = 0.96 })
+			tween(self.Root, 0.1, { BackgroundTransparency = math.min((self.Theme.PanelTransparency or 0) + 0.25, 1) })
+			task.delay(0.12, function()
+				if not self._visible and self.Root then
+					self.Root.Visible = false
+				end
+			end)
+		else
+			self.Root.Visible = false
+		end
+	end
 end
 
 function Window:SetMinimized(minimized)
@@ -1145,6 +1350,7 @@ function Window:CreateTab(title, icon)
 		Visible = false,
 		Parent = self.Content,
 	})
+	local pageScale = addScale(page, 1)
 	padding(page, 0, 0, 4, 0)
 	local pageLayout = list(page, 7)
 	autoCanvas(page, pageLayout)
@@ -1157,8 +1363,8 @@ function Window:CreateTab(title, icon)
 		Font = handFont(),
 		Text = (icon and icon ~= "" and (icon .. " ") or "") .. tostring(title or "Tab"),
 		TextColor3 = theme.Text,
-		TextSize = 16,
-		Size = UDim2.new(1, 0, 0, 28),
+		TextSize = 17,
+		Size = UDim2.new(1, 0, 0, 34),
 		Parent = self.TabsBar,
 	})
 	applyHandFont(button)
@@ -1179,6 +1385,7 @@ function Window:CreateTab(title, icon)
 		Window = self,
 		Title = title,
 		Page = page,
+		PageScale = pageScale,
 		Button = button,
 		Gradient = gradient,
 		Layout = pageLayout,
@@ -1218,10 +1425,22 @@ function Window:CreateTab(title, icon)
 end
 
 function Window:SelectTab(tab)
+	local previous = self._activeTab
 	for _, other in ipairs(self._tabs) do
-		other.Page.Visible = other == tab
-		other.Gradient.Enabled = other == tab
-		other.Button.BackgroundTransparency = other == tab and 0 or 1
+		local selected = other == tab
+		other.Gradient.Enabled = selected
+
+		if selected then
+			other.Page.Visible = true
+			if motionEnabled() and other.PageScale and previous ~= tab then
+				other.PageScale.Scale = 0.985
+				tweenStyle(other.PageScale, 0.18, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			end
+			tween(other.Button, 0.12, { BackgroundTransparency = 0 })
+		else
+			other.Page.Visible = false
+			tween(other.Button, 0.1, { BackgroundTransparency = 1 })
+		end
 	end
 	self._activeTab = tab
 end
@@ -1247,6 +1466,16 @@ function Window:Notify(options)
 	corner(toast, theme)
 	stroke(toast, theme, 2)
 	padding(toast, 9, 5, 9, 5)
+	local toastScale = addScale(toast, motionEnabled() and 0.94 or 1)
+	local accent = make("Frame", {
+		BackgroundColor3 = theme.BarFill,
+		BackgroundTransparency = 0.08,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 8, 1, -7),
+		Size = UDim2.new(1, -16, 0, 4),
+		Parent = toast,
+	})
+	corner(accent, theme, 3)
 
 	local title = make("TextLabel", {
 		BackgroundTransparency = 1,
@@ -1271,8 +1500,22 @@ function Window:Notify(options)
 		Parent = toast,
 	})
 
+	if motionEnabled() then
+		local targetTransparency = toast.BackgroundTransparency
+		toast.BackgroundTransparency = 1
+		task.defer(function()
+			if toast.Parent then
+				tweenStyle(toastScale, 0.2, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+				tween(toast, 0.14, { BackgroundTransparency = targetTransparency })
+			end
+		end)
+	end
+
 	task.delay(options.Duration or 3, function()
 		if toast.Parent then
+			if motionEnabled() then
+				tween(toastScale, 0.1, { Scale = 0.94 })
+			end
 			tween(toast, 0.12, { BackgroundTransparency = 1 })
 			task.wait(0.14)
 			if toast.Parent then
@@ -1370,6 +1613,7 @@ function Tab:_row(height)
 	})
 	corner(row, theme)
 	stroke(row, theme, 2)
+	local rowScale = addScale(row, 1)
 
 	self.Window:_bindTheme(function(nextTheme)
 		row.BackgroundColor3 = nextTheme.Panel
@@ -1377,6 +1621,17 @@ function Tab:_row(height)
 		updateStroke(row, nextTheme)
 		updateCorner(row, nextTheme)
 	end)
+
+	if motionEnabled() then
+		rowScale.Scale = 0.985
+		row.BackgroundTransparency = 1
+		task.defer(function()
+			if row.Parent then
+				tweenStyle(rowScale, 0.18, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+				tween(row, 0.16, { BackgroundTransparency = self.Window.Theme.RowTransparency })
+			end
+		end)
+	end
 
 	return row
 end
@@ -1639,7 +1894,7 @@ function Tab:Quest(options)
 		end
 		value = clampNumber(nextValue, 0, maxValue)
 		counter.Text = tostring(value) .. "/" .. tostring(maxValue)
-		fill.Size = UDim2.fromScale(value / math.max(maxValue, 1), 1)
+		setProgressFill(fill, value / math.max(maxValue, 1))
 	end
 
 	set(value, maxValue)
@@ -1682,7 +1937,7 @@ function Tab:Progress(options)
 		end
 		value = clampNumber(nextValue, 0, maxValue)
 		title.Text = tostring(options.Title or "Progress") .. ": " .. tostring(math.floor((value / maxValue) * 100 + 0.5)) .. "%"
-		fill.Size = UDim2.fromScale(value / math.max(maxValue, 1), 1)
+		setProgressFill(fill, value / math.max(maxValue, 1))
 	end
 
 	set(value, maxValue)
@@ -1871,7 +2126,7 @@ function Tab:Slider(options)
 		local alpha = (value - minValue) / math.max(maxValue - minValue, 0.0001)
 		self.Window:_setFlag(flag, value)
 		valueLabel.Text = tostring(value)
-		fill.Size = UDim2.fromScale(alpha, 1)
+		setProgressFill(fill, alpha)
 		if not silent then
 			call(options.Callback, value)
 		end

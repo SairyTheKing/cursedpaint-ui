@@ -5,11 +5,12 @@
 ```lua
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Dark",
-	Size = UDim2.fromOffset(690, 395),
-	MinSize = Vector2.new(520, 320),
+	Theme = "Brawl",
+	Size = UDim2.fromOffset(780, 460),
+	MinSize = Vector2.new(580, 350),
 	Position = UDim2.fromScale(0.5, 0.5),
 	Resizable = true,
+	Animated = true,
 	BackgroundImage = nil,
 	SideImage = nil,
 	ToggleKey = Enum.KeyCode.RightControl,
@@ -20,11 +21,12 @@ local Window = CursedPaint:CreateWindow({
 
 Options:
 
-- `Theme`: theme name. Default is `Dark`.
+- `Theme`: theme name. Default is `Brawl`.
 - `Size`: window size.
 - `MinSize`: resize limit as `Vector2` or offset `UDim2`.
 - `Position`: window position.
 - `Resizable`: set to `false` to hide the resize handle.
+- `Animated`: set to `false` to disable the opening animation for that window.
 - `Title`: optional left-menu title.
 - `BackgroundImage`: optional full-board image.
 - `SideImage`: optional faded image on the content side.
@@ -47,6 +49,7 @@ Window:CreateTab("Main")
 ```lua
 Window:SetTheme("Paper")
 Window:SetFont("Cartoon")
+Window:SetMotion(true, 1.25)
 Window:SetVisible(true)
 Window:SetMinimized(false)
 Window:SetBackgroundImage("rbxassetid://123456", 0.7)
@@ -55,6 +58,13 @@ Window:Notify({ Title = "Hi", Content = "Loaded." })
 Window:SaveConfig("main")
 Window:LoadConfig("main")
 Window:Destroy()
+```
+
+Global motion setting:
+
+```lua
+CursedPaint:SetMotion(true, 1) -- enabled, normal speed
+CursedPaint:SetMotion(false) -- disables new UI animations
 ```
 
 ## Image Helpers

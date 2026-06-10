@@ -4,7 +4,7 @@
 
 CursedPaint UI is a simple Roblox Luau UI library for testing panels, script menus, settings pages, and showcase interfaces.
 
-It uses a dark rounded sketch style by default, with FingerPaint-style text when Roblox supports it. The goal is quick setup, readable code, and enough controls to build a real panel without fighting the API.
+It uses a bigger animated sketch-menu style by default, with FingerPaint-style text when Roblox supports it. The goal is quick setup, readable code, and enough controls to build a real panel without fighting the API.
 
 ## Load
 
@@ -29,9 +29,10 @@ local CursedPaint = require(path.to.Source)
 ```lua
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Dark",
-	Size = UDim2.fromOffset(690, 395),
+	Theme = "Brawl",
+	Size = UDim2.fromOffset(780, 460),
 	Resizable = true,
+	Animated = true,
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
@@ -54,8 +55,9 @@ Main:AddSlider({
 
 ## Features
 
-- Dark rounded default theme, plus `Paper`, `Smoke`, `Blood`, `Void`, `Forest`, and `Candy`.
+- Bigger animated `Brawl` default theme, plus `Dark`, `Paper`, `Smoke`, `Blood`, `Void`, `Forest`, and `Candy`.
 - Draggable, minimizable, closable, toggleable, and resizable window.
+- Animated opening, tab switching, toasts, rows, buttons, and progress bars.
 - Tabs, sections, labels, paragraphs, images, banners, quests, and progress bars.
 - Buttons, toggles, sliders, steppers, dropdowns, multi-dropdowns, textboxes, keybinds, and color pickers.
 - Notifications and theme switching.

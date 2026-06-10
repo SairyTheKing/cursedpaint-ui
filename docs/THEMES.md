@@ -1,8 +1,9 @@
 # Themes
 
-CursedPaint ships with seven themes:
+CursedPaint ships with eight themes:
 
-- `Dark` default
+- `Brawl` default
+- `Dark`
 - `Paper`
 - `Smoke`
 - `Blood`
@@ -14,7 +15,7 @@ Set a theme when creating the window:
 
 ```lua
 local Window = CursedPaint:CreateWindow({
-	Theme = "Dark",
+	Theme = "Brawl",
 })
 ```
 
@@ -37,23 +38,25 @@ Add a new theme before creating your window:
 
 ```lua
 CursedPaint.Themes.MyTheme = {
-	Backdrop = Color3.fromRGB(11, 12, 16),
-	Left = Color3.fromRGB(17, 19, 26),
-	Panel = Color3.fromRGB(27, 29, 38),
-	PanelAlt = Color3.fromRGB(37, 40, 51),
-	Text = Color3.fromRGB(246, 241, 232),
-	Muted = Color3.fromRGB(170, 164, 154),
-	Ink = Color3.fromRGB(2, 3, 6),
-	SelectedTop = Color3.fromRGB(74, 79, 102),
-	SelectedBottom = Color3.fromRGB(132, 82, 126),
-	Bar = Color3.fromRGB(57, 62, 78),
-	BarFill = Color3.fromRGB(26, 203, 246),
-	Good = Color3.fromRGB(76, 220, 128),
-	Bad = Color3.fromRGB(238, 81, 90),
-	PanelTransparency = 0.02,
-	RowTransparency = 0.04,
-	Radius = 10,
-	StrokeThickness = 1.4,
+	Backdrop = Color3.fromRGB(35, 35, 38),
+	Left = Color3.fromRGB(232, 226, 176),
+	Panel = Color3.fromRGB(238, 238, 231),
+	PanelAlt = Color3.fromRGB(204, 205, 199),
+	Text = Color3.fromRGB(13, 13, 13),
+	Muted = Color3.fromRGB(47, 47, 47),
+	Ink = Color3.fromRGB(0, 0, 0),
+	SelectedTop = Color3.fromRGB(255, 246, 143),
+	SelectedBottom = Color3.fromRGB(213, 93, 58),
+	Bar = Color3.fromRGB(88, 88, 86),
+	BarFill = Color3.fromRGB(18, 203, 245),
+	Good = Color3.fromRGB(69, 190, 102),
+	Bad = Color3.fromRGB(220, 67, 70),
+	PanelTransparency = 0.16,
+	RowTransparency = 0.08,
+	TextureTransparency = 0.8,
+	GlowTransparency = 0.78,
+	Radius = 9,
+	StrokeThickness = 1.8,
 }
 
 local Window = CursedPaint:CreateWindow({
@@ -78,5 +81,7 @@ local Window = CursedPaint:CreateWindow({
 - `Bad`: negative/error color.
 - `PanelTransparency`: outer board transparency.
 - `RowTransparency`: control row transparency.
+- `TextureTransparency`: subtle inner paper/glass overlay transparency.
+- `GlowTransparency`: subtle accent glow transparency.
 - `Radius`: corner radius in pixels.
 - `StrokeThickness`: default border thickness.

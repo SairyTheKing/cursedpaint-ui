@@ -6,10 +6,11 @@ local DemoImage = CursedPaint:GetPlaceholderImage()
 
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Dark",
-	Size = UDim2.fromOffset(690, 395),
-	MinSize = Vector2.new(520, 320),
+	Theme = "Brawl",
+	Size = UDim2.fromOffset(780, 460),
+	MinSize = Vector2.new(580, 350),
 	Resizable = true,
+	Animated = true,
 	SideImage = DemoImage,
 	SideImageTransparency = 0.78,
 	ToggleKey = Enum.KeyCode.RightControl,
@@ -25,8 +26,8 @@ Window:AddTab("-")
 
 Main:AddSection("CursedPaint UI")
 Main:AddBanner({
-	Title = "Dark Sketch Menu",
-	Caption = "Rounded, draggable, resizable, and built for quick Luau panels.",
+	Title = "Brawl Sketch Menu",
+	Caption = "Bigger, animated, rounded, and built for quick Luau panels.",
 	Image = DemoImage,
 	ImageTransparency = 0.18,
 })
@@ -170,9 +171,20 @@ Settings:AddDropdown({
 	Title = "Theme",
 	Flag = "theme_select",
 	Options = Window:GetThemes(),
-	Default = "Dark",
+	Default = "Brawl",
 	Callback = function(theme)
 		Window:SetTheme(theme)
+	end,
+})
+Settings:AddSlider({
+	Title = "Motion Speed",
+	Flag = "motion_speed",
+	Min = 0.5,
+	Max = 2,
+	Step = 0.1,
+	Default = 1,
+	Callback = function(value)
+		Window:SetMotion(true, value)
 	end,
 })
 Settings:AddDropdown({
