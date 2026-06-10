@@ -6,8 +6,8 @@ local DemoImage = CursedPaint:GetPlaceholderImage()
 
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Size = UDim2.fromOffset(780, 460),
-	MinSize = Vector2.new(580, 350),
+	Size = UDim2.fromOffset(840, 500),
+	MinSize = Vector2.new(640, 390),
 	Resizable = true,
 	Animated = true,
 	SideImage = DemoImage,

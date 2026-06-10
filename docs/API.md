@@ -5,8 +5,8 @@
 ```lua
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Size = UDim2.fromOffset(780, 460),
-	MinSize = Vector2.new(580, 350),
+	Size = UDim2.fromOffset(840, 500),
+	MinSize = Vector2.new(640, 390),
 	Position = UDim2.fromScale(0.5, 0.5),
 	Resizable = true,
 	Animated = true,
@@ -23,6 +23,9 @@ Options:
 - `Theme`: ignored. CursedPaint now ships one `JJS` style.
 - `Size`: window size.
 - `MinSize`: resize limit as `Vector2` or offset `UDim2`.
+- `SidebarWidth`: optional left tab width. Default is `190`.
+- `ContentTop`: optional top content inset. Default reserves space for window buttons.
+- `ContentBottomInset`: optional bottom content inset. Default reserves space for the lower bar.
 - `Position`: window position.
 - `Resizable`: set to `false` to hide the resize handle.
 - `Animated`: set to `false` to disable the opening animation for that window.

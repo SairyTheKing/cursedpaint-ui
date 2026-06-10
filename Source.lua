@@ -3,7 +3,7 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.7.3"
+CursedPaint.Version = "0.7.4"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
 CursedPaint._downloadedFontAssets = {}
@@ -26,10 +26,10 @@ CursedPaint.Motion = {
 
 CursedPaint.Themes = {
 	JJS = {
-		Backdrop = Color3.fromRGB(115, 115, 112),
-		Left = Color3.fromRGB(246, 241, 183),
-		Panel = Color3.fromRGB(242, 242, 235),
-		PanelAlt = Color3.fromRGB(190, 190, 184),
+		Backdrop = Color3.fromRGB(104, 103, 99),
+		Left = Color3.fromRGB(249, 244, 184),
+		Panel = Color3.fromRGB(248, 247, 238),
+		PanelAlt = Color3.fromRGB(220, 219, 208),
 		Text = Color3.fromRGB(8, 8, 8),
 		Muted = Color3.fromRGB(34, 34, 34),
 		Ink = Color3.fromRGB(0, 0, 0),
@@ -39,13 +39,13 @@ CursedPaint.Themes = {
 		BarFill = Color3.fromRGB(10, 204, 245),
 		Good = Color3.fromRGB(68, 188, 100),
 		Bad = Color3.fromRGB(220, 62, 66),
-		PanelTransparency = 0.32,
-		RowTransparency = 0.1,
-		TextureTransparency = 0.92,
+		PanelTransparency = 0.24,
+		RowTransparency = 0.03,
+		TextureTransparency = 0.95,
 		GlowTransparency = 1,
-		Radius = 5,
-		StrokeThickness = 3,
-		ThinStrokeThickness = 2,
+		Radius = 7,
+		StrokeThickness = 4,
+		ThinStrokeThickness = 3,
 	},
 }
 
@@ -866,6 +866,21 @@ local function setHandText(label, size, align)
 	label.TextWrapped = true
 	label.TextXAlignment = align or Enum.TextXAlignment.Left
 	label.TextYAlignment = Enum.TextYAlignment.Center
+	pcall(function()
+		label.LineHeight = 0.92
+	end)
+end
+
+local function setSingleLineText(label, align)
+	label.TextWrapped = false
+	label.TextXAlignment = align or Enum.TextXAlignment.Left
+	label.TextYAlignment = Enum.TextYAlignment.Center
+	pcall(function()
+		label.TextTruncate = Enum.TextTruncate.AtEnd
+	end)
+	pcall(function()
+		label.LineHeight = 0.92
+	end)
 end
 
 local function updateStroke(parent, theme)
@@ -1017,6 +1032,7 @@ local function makeButton(parent, text, theme, width)
 		Parent = parent,
 	})
 	applyHandFont(button)
+	setSingleLineText(button, Enum.TextXAlignment.Center)
 	corner(button, theme)
 	stroke(button, theme, 2)
 	setButtonRestTransparency(button, theme.RowTransparency)
@@ -1090,10 +1106,11 @@ local function rowTitle(parent, title, theme, y, rightWidth)
 		Text = tostring(title or "Control"),
 		TextColor3 = theme.Text,
 		Position = UDim2.fromOffset(8, y or 3),
-		Size = UDim2.new(1, -(rightWidth or 120), 0, 28),
+		Size = UDim2.new(1, -(rightWidth or 120), 0, 30),
 		Parent = parent,
 	})
-	setHandText(label, 21)
+	setHandText(label, 20)
+	setSingleLineText(label)
 	return label
 end
 
@@ -1111,6 +1128,9 @@ function CursedPaint:CreateWindow(options)
 	local theme = getTheme(themeName)
 	local parent = options.Parent or resolveParent()
 	assert(parent, "CursedPaint UI could not find a UI parent.")
+	local sidebarWidth = tonumber(options.SidebarWidth) or 190
+	local contentTop = tonumber(options.ContentTop) or 48
+	local contentBottomInset = tonumber(options.ContentBottomInset) or 58
 
 	local gui = make("ScreenGui", {
 		Name = options.GuiName or "CursedPaintUI",
@@ -1129,7 +1149,7 @@ function CursedPaint:CreateWindow(options)
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
 		Position = options.Position or UDim2.fromScale(0.5, 0.5),
-		Size = options.Size or UDim2.fromOffset(780, 460),
+		Size = options.Size or UDim2.fromOffset(840, 500),
 		ZIndex = 1,
 		Parent = gui,
 	})
@@ -1184,7 +1204,7 @@ function CursedPaint:CreateWindow(options)
 		BackgroundTransparency = 0.12,
 		BorderSizePixel = 0,
 		Position = UDim2.fromOffset(10, 10),
-		Size = UDim2.new(0, 190, 1, -20),
+		Size = UDim2.new(0, sidebarWidth, 1, -20),
 		ZIndex = 3,
 		Parent = root,
 	})
@@ -1204,6 +1224,7 @@ function CursedPaint:CreateWindow(options)
 			Parent = left,
 		})
 		setHandText(titleLabel, 24, Enum.TextXAlignment.Center)
+		setSingleLineText(titleLabel, Enum.TextXAlignment.Center)
 		tabsTop = 48
 	end
 
@@ -1214,18 +1235,18 @@ function CursedPaint:CreateWindow(options)
 		Position = UDim2.fromOffset(6, tabsTop),
 		ScrollBarImageColor3 = theme.Ink,
 		ScrollBarThickness = 3,
-		Size = UDim2.new(1, -12, 1, -(tabsTop + 6)),
+		Size = UDim2.new(1, -12, 1, -(tabsTop + 34)),
 		ZIndex = 4,
 		Parent = left,
 	})
-	local tabsLayout = list(tabs, 1)
+	local tabsLayout = list(tabs, 2)
 	autoCanvas(tabs, tabsLayout)
 
 	local content = make("Frame", {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(212, 10),
-		Size = UDim2.new(1, -222, 1, -20),
+		Position = UDim2.fromOffset(sidebarWidth + 22, contentTop),
+		Size = UDim2.new(1, -(sidebarWidth + 32), 1, -(contentTop + contentBottomInset)),
 		ZIndex = 3,
 		Parent = root,
 	})
@@ -1246,8 +1267,8 @@ function CursedPaint:CreateWindow(options)
 		BackgroundColor3 = theme.BarFill,
 		BackgroundTransparency = 0.18,
 		BorderSizePixel = 0,
-		Position = UDim2.new(0, 10, 1, -25),
-		Size = UDim2.new(1, -20, 0, 16),
+		Position = UDim2.new(0, 12, 1, -34),
+		Size = UDim2.new(1, -24, 0, 18),
 		ZIndex = 4,
 		Parent = root,
 	})
@@ -1267,7 +1288,7 @@ function CursedPaint:CreateWindow(options)
 		BackgroundColor3 = theme.BarFill,
 		BackgroundTransparency = 0.12,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(14, 8),
+		Position = UDim2.fromOffset(14, 12),
 		Size = UDim2.new(1, -28, 0, 4),
 		ZIndex = 5,
 		Parent = root,
@@ -1275,11 +1296,11 @@ function CursedPaint:CreateWindow(options)
 	corner(topStrip, theme, 3)
 
 	local close = makeButton(root, "X", theme, 28)
-	close.Position = UDim2.new(1, -38, 0, 10)
+	close.Position = UDim2.new(1, -38, 0, 16)
 	close.ZIndex = 20
 
 	local minimize = makeButton(root, "-", theme, 28)
-	minimize.Position = UDim2.new(1, -72, 0, 10)
+	minimize.Position = UDim2.new(1, -72, 0, 16)
 	minimize.ZIndex = 20
 
 	local resizeGrip
@@ -1302,7 +1323,7 @@ function CursedPaint:CreateWindow(options)
 	local toastLayout = list(toastHolder, 8)
 	toastLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 
-	local minSize = options.MinSize or Vector2.new(580, 350)
+	local minSize = options.MinSize or Vector2.new(640, 390)
 	if kindOf(minSize) == "UDim2" then
 		minSize = Vector2.new(minSize.X.Offset, minSize.Y.Offset)
 	end
@@ -1797,10 +1818,11 @@ function Window:CreateTab(title, icon)
 		Text = (icon and icon ~= "" and (icon .. " ") or "") .. tostring(title or "Tab"),
 		TextColor3 = theme.Text,
 		TextSize = 17,
-		Size = UDim2.new(1, 0, 0, 34),
+		Size = UDim2.new(1, 0, 0, 38),
 		Parent = self.TabsBar,
 	})
 	applyHandFont(button)
+	setSingleLineText(button, Enum.TextXAlignment.Center)
 	corner(button, theme, 6)
 	stroke(button, theme, 1)
 
@@ -2046,7 +2068,7 @@ function Tab:_row(height)
 		BackgroundTransparency = theme.RowTransparency,
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
-		Size = UDim2.new(1, 0, 0, height or 58),
+		Size = UDim2.new(1, 0, 0, height or 64),
 		ZIndex = 6,
 		Parent = self.Page,
 	})
@@ -2081,10 +2103,11 @@ function Tab:Section(title)
 		BackgroundTransparency = 1,
 		Text = tostring(title or "Section"),
 		TextColor3 = theme.Text,
-		Size = UDim2.new(1, 0, 0, 34),
+		Size = UDim2.new(1, 0, 0, 38),
 		Parent = self.Page,
 	})
 	setHandText(label, 22)
+	setSingleLineText(label)
 
 	self.Window:_bindTheme(function(nextTheme)
 		label.TextColor3 = nextTheme.Text
@@ -2095,7 +2118,7 @@ end
 
 function Tab:Label(text)
 	local theme = self.Window.Theme
-	local row = self:_row(36)
+	local row = self:_row(42)
 	local label = make("TextLabel", {
 		BackgroundTransparency = 1,
 		Text = tostring(text or "Label"),
@@ -2105,6 +2128,7 @@ function Tab:Label(text)
 		Parent = row,
 	})
 	setHandText(label, 17)
+	setSingleLineText(label)
 
 	self.Window:_bindTheme(function(nextTheme)
 		label.TextColor3 = nextTheme.Text
@@ -2148,6 +2172,7 @@ function Tab:Divider(text)
 			Parent = row,
 		})
 		setHandText(label, 16)
+		setSingleLineText(label, Enum.TextXAlignment.Center)
 		corner(label, theme, 6)
 		stroke(label, theme, 1)
 	end
@@ -2177,7 +2202,7 @@ end
 function Tab:Paragraph(options)
 	options = options or {}
 	local theme = self.Window.Theme
-	local row = self:_row(88)
+	local row = self:_row(options.Height or 104)
 	local title = rowTitle(row, options.Title or "Info", theme, 2, 16)
 	local body = make("TextLabel", {
 		BackgroundTransparency = 1,
@@ -2188,8 +2213,8 @@ function Tab:Paragraph(options)
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
-		Position = UDim2.fromOffset(9, 33),
-		Size = UDim2.new(1, -18, 1, -38),
+		Position = UDim2.fromOffset(9, 36),
+		Size = UDim2.new(1, -18, 1, -44),
 		Parent = row,
 	})
 
@@ -2246,6 +2271,7 @@ function Tab:Image(options)
 			Parent = row,
 		})
 		setHandText(title, 20)
+		setSingleLineText(title)
 	end
 
 	local caption
@@ -2262,6 +2288,7 @@ function Tab:Image(options)
 			ZIndex = 4,
 			Parent = row,
 		})
+		setSingleLineText(caption)
 	end
 
 	self.Window:_bindTheme(function(nextTheme)
@@ -2299,13 +2326,14 @@ function Tab:Quest(options)
 	local theme = self.Window.Theme
 	local maxValue = tonumber(options.Max) or 1
 	local value = clampNumber(options.Value or 0, 0, maxValue)
-	local row = self:_row(options.Height or 82)
+	local height = options.Height or 92
+	local row = self:_row(height)
 	local art = imageLabel(row, options.Image or options.Portrait, {
 		AnchorPoint = Vector2.new(1, 0),
 		ImageTransparency = options.ImageTransparency or 0.55,
 		Position = UDim2.new(1, -2, 0, 2),
 		ScaleType = Enum.ScaleType.Crop,
-		Size = UDim2.fromOffset(options.ImageWidth or 150, (options.Height or 82) - 4),
+		Size = UDim2.fromOffset(options.ImageWidth or 150, height - 4),
 		ZIndex = 2,
 	})
 	if art then
@@ -2317,13 +2345,14 @@ function Tab:Quest(options)
 		BackgroundTransparency = 1,
 		Text = tostring(value) .. "/" .. tostring(maxValue),
 		TextColor3 = theme.Text,
-		Position = UDim2.fromOffset(8, 33),
+		Position = UDim2.fromOffset(8, 38),
 		Size = UDim2.new(1, art and -176 or -16, 0, 24),
 		ZIndex = 4,
 		Parent = row,
 	})
 	setHandText(counter, 22)
-	local track, fill = createProgressBar(row, theme, 60)
+	setSingleLineText(counter)
+	local track, fill = createProgressBar(row, theme, height - 22)
 	track.ZIndex = 5
 	fill.ZIndex = 6
 
@@ -2366,9 +2395,9 @@ function Tab:Progress(options)
 	local theme = self.Window.Theme
 	local maxValue = tonumber(options.Max) or 100
 	local value = clampNumber(options.Value or 0, 0, maxValue)
-	local row = self:_row(options.Height or 56)
-	local title = rowTitle(row, options.Title or "Progress", theme, 0, 16)
-	local track, fill = createProgressBar(row, theme, 36)
+	local row = self:_row(options.Height or 64)
+	local title = rowTitle(row, options.Title or "Progress", theme, 3, 16)
+	local track, fill = createProgressBar(row, theme, 44)
 
 	local function set(nextValue, nextMax)
 		if nextMax then
@@ -2402,18 +2431,18 @@ end
 function Tab:Button(options)
 	options = options or {}
 	local theme = self.Window.Theme
-	local row = self:_row(56)
-	local title = rowTitle(row, options.Title or "Button", theme, 2, 128)
+	local row = self:_row(66)
+	local title = rowTitle(row, options.Title or "Button", theme, 4, 128)
 	local icon = imageLabel(row, options.Icon, {
 		ImageTransparency = options.IconTransparency or 0,
-		Position = UDim2.fromOffset(8, 10),
+		Position = UDim2.fromOffset(8, 16),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromOffset(34, 34),
 		ZIndex = 4,
 	})
 	if icon then
-		title.Position = UDim2.fromOffset(48, 2)
-		title.Size = UDim2.new(1, -168, 0, 28)
+		title.Position = UDim2.fromOffset(48, 4)
+		title.Size = UDim2.new(1, -168, 0, 30)
 	end
 	local desc
 	if options.Description then
@@ -2424,10 +2453,11 @@ function Tab:Button(options)
 			TextColor3 = theme.Muted,
 			TextSize = 12,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.fromOffset(icon and 49 or 9, 32),
+			Position = UDim2.fromOffset(icon and 49 or 9, 39),
 			Size = UDim2.new(1, icon and -180 or -140, 0, 18),
 			Parent = row,
 		})
+		setSingleLineText(desc)
 	end
 
 	local button = makeButton(row, options.ButtonText or "DO", theme, 105)
@@ -2464,18 +2494,18 @@ function Tab:Toggle(options)
 	local theme = self.Window.Theme
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = options.Default == true
-	local row = self:_row(56)
-	local title = rowTitle(row, options.Title or "Toggle", theme, 2, 128)
+	local row = self:_row(66)
+	local title = rowTitle(row, options.Title or "Toggle", theme, 4, 128)
 	local icon = imageLabel(row, options.Icon, {
 		ImageTransparency = options.IconTransparency or 0,
-		Position = UDim2.fromOffset(8, 10),
+		Position = UDim2.fromOffset(8, 16),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromOffset(34, 34),
 		ZIndex = 4,
 	})
 	if icon then
-		title.Position = UDim2.fromOffset(48, 2)
-		title.Size = UDim2.new(1, -168, 0, 28)
+		title.Position = UDim2.fromOffset(48, 4)
+		title.Size = UDim2.new(1, -168, 0, 30)
 	end
 	local desc
 	if options.Description then
@@ -2486,10 +2516,11 @@ function Tab:Toggle(options)
 			TextColor3 = theme.Muted,
 			TextSize = 12,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.fromOffset(icon and 49 or 9, 32),
+			Position = UDim2.fromOffset(icon and 49 or 9, 39),
 			Size = UDim2.new(1, icon and -180 or -140, 0, 18),
 			Parent = row,
 		})
+		setSingleLineText(desc)
 	end
 	local button = makeButton(row, boolText(value), theme, 105)
 	button.AnchorPoint = Vector2.new(1, 0.5)
@@ -2549,8 +2580,8 @@ function Tab:Slider(options)
 	local step = tonumber(options.Step) or 1
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = roundToStep(clampNumber(options.Default or minValue, minValue, maxValue), step)
-	local row = self:_row(72)
-	local title = rowTitle(row, options.Title or "Slider", theme, 1, 92)
+	local row = self:_row(82)
+	local title = rowTitle(row, options.Title or "Slider", theme, 3, 92)
 	local valueLabel = make("TextLabel", {
 		BackgroundTransparency = 1,
 		Text = tostring(value),
@@ -2558,12 +2589,13 @@ function Tab:Slider(options)
 		Font = handFont(),
 		TextSize = 19,
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Position = UDim2.new(1, -88, 0, 3),
+		Position = UDim2.new(1, -88, 0, 5),
 		Size = UDim2.fromOffset(80, 24),
 		Parent = row,
 	})
 	applyHandFont(valueLabel)
-	local track, fill = createProgressBar(row, theme, 48)
+	setSingleLineText(valueLabel, Enum.TextXAlignment.Right)
+	local track, fill = createProgressBar(row, theme, 56)
 	local dragging = false
 	local userInput = service("UserInputService")
 
@@ -2636,8 +2668,8 @@ function Tab:Stepper(options)
 	local step = tonumber(options.Step) or 1
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = roundToStep(clampNumber(options.Default or minValue, minValue, maxValue), step)
-	local row = self:_row(56)
-	local title = rowTitle(row, options.Title or "Stepper", theme, 2, 154)
+	local row = self:_row(66)
+	local title = rowTitle(row, options.Title or "Stepper", theme, 4, 154)
 
 	local minus = makeButton(row, "-", theme, 32)
 	minus.AnchorPoint = Vector2.new(1, 0.5)
@@ -2657,6 +2689,7 @@ function Tab:Stepper(options)
 		Parent = row,
 	})
 	applyHandFont(valueLabel)
+	setSingleLineText(valueLabel, Enum.TextXAlignment.Center)
 	corner(valueLabel, theme)
 	stroke(valueLabel, theme, 1)
 
@@ -2721,12 +2754,13 @@ function Tab:Dropdown(options)
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = options.Default or choices[1]
 	local open = false
-	local closedHeight = 56
+	local optionHeight = 32
+	local closedHeight = 66
 	local row = self:_row(closedHeight)
-	local title = rowTitle(row, options.Title or "Dropdown", theme, 2, 136)
+	local title = rowTitle(row, options.Title or "Dropdown", theme, 4, 136)
 	local button = makeButton(row, tostring(value or "Pick"), theme, 124)
 	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, -8, 0, 28)
+	button.Position = UDim2.new(1, -8, 0, 33)
 	button.TextSize = 15
 
 	local menu = make("Frame", {
@@ -2762,11 +2796,13 @@ function Tab:Dropdown(options)
 			Text = tostring(choice),
 			TextColor3 = theme.Text,
 			TextSize = 16,
-			Size = UDim2.new(1, 0, 0, 28),
+			Size = UDim2.new(1, 0, 0, optionHeight),
 			ZIndex = 11,
 			Parent = menu,
 		})
 		applyHandFont(option)
+		setSingleLineText(option)
+		padding(option, 8, 0, 8, 0)
 		option.MouseButton1Click:Connect(function()
 			set(choice)
 			open = false
@@ -2778,7 +2814,7 @@ function Tab:Dropdown(options)
 	button.MouseButton1Click:Connect(function()
 		open = not open
 		menu.Visible = open
-		local menuHeight = #choices * 28
+		local menuHeight = #choices * optionHeight
 		menu.Size = UDim2.new(1, -16, 0, menuHeight)
 		row.Size = UDim2.new(1, 0, 0, open and (closedHeight + menuHeight + 8) or closedHeight)
 	end)
@@ -2825,12 +2861,13 @@ function Tab:MultiDropdown(options)
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local selected = {}
 	local open = false
-	local closedHeight = 56
+	local optionHeight = 32
+	local closedHeight = 66
 	local row = self:_row(closedHeight)
-	local title = rowTitle(row, options.Title or "Multi Dropdown", theme, 2, 146)
+	local title = rowTitle(row, options.Title or "Multi Dropdown", theme, 4, 146)
 	local button = makeButton(row, "...", theme, 134)
 	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, -8, 0, 28)
+	button.Position = UDim2.new(1, -8, 0, 33)
 	button.TextSize = 14
 
 	local menu = make("Frame", {
@@ -2908,11 +2945,12 @@ function Tab:MultiDropdown(options)
 			TextColor3 = theme.Text,
 			TextSize = 15,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Size = UDim2.new(1, 0, 0, 28),
+			Size = UDim2.new(1, 0, 0, optionHeight),
 			ZIndex = 11,
 			Parent = menu,
 		})
 		applyHandFont(option)
+		setSingleLineText(option)
 		padding(option, 8, 0, 8, 0)
 		optionButtons[choice] = option
 		option.MouseButton1Click:Connect(function()
@@ -2927,7 +2965,7 @@ function Tab:MultiDropdown(options)
 	button.MouseButton1Click:Connect(function()
 		open = not open
 		menu.Visible = open
-		local menuHeight = #choices * 28
+		local menuHeight = #choices * optionHeight
 		menu.Size = UDim2.new(1, -16, 0, menuHeight)
 		row.Size = UDim2.new(1, 0, 0, open and (closedHeight + menuHeight + 8) or closedHeight)
 	end)
@@ -2969,8 +3007,8 @@ function Tab:Textbox(options)
 	options = options or {}
 	local theme = self.Window.Theme
 	local flag = normalizeFlag(options.Title, options.Flag)
-	local row = self:_row(58)
-	local title = rowTitle(row, options.Title or "Textbox", theme, 2, 168)
+	local row = self:_row(66)
+	local title = rowTitle(row, options.Title or "Textbox", theme, 4, 168)
 	local box = make("TextBox", {
 		BackgroundColor3 = theme.PanelAlt,
 		BackgroundTransparency = 0.05,
@@ -3034,8 +3072,8 @@ function Tab:Keybind(options)
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = options.Default or Enum.KeyCode.RightShift
 	local listening = false
-	local row = self:_row(56)
-	local title = rowTitle(row, options.Title or "Keybind", theme, 2, 136)
+	local row = self:_row(66)
+	local title = rowTitle(row, options.Title or "Keybind", theme, 4, 136)
 	local button = makeButton(row, value.Name, theme, 124)
 	button.AnchorPoint = Vector2.new(1, 0.5)
 	button.Position = UDim2.new(1, -8, 0.5, 0)
@@ -3114,11 +3152,11 @@ function Tab:ColorPicker(options)
 		colors = { Color3.fromRGB(255, 255, 255) }
 	end
 	local value = options.Default or colors[1]
-	local row = self:_row(70)
-	local title = rowTitle(row, options.Title or "Color", theme, 2, 16)
+	local row = self:_row(82)
+	local title = rowTitle(row, options.Title or "Color", theme, 4, 16)
 	local holder = make("Frame", {
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(8, 36),
+		Position = UDim2.fromOffset(8, 46),
 		Size = UDim2.new(1, -16, 0, 26),
 		Parent = row,
 	})

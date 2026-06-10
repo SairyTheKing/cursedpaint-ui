@@ -29,7 +29,7 @@ local CursedPaint = require(path.to.Source)
 ```lua
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Size = UDim2.fromOffset(780, 460),
+	Size = UDim2.fromOffset(840, 500),
 	Resizable = true,
 	Animated = true,
 	ToggleKey = Enum.KeyCode.RightControl,
@@ -56,6 +56,7 @@ Main:AddSlider({
 
 - One default `JJS` sketch theme.
 - Thick black outlines across windows, tabs, rows, buttons, inputs, and bars.
+- Roomier rows and reserved window-control space to avoid text/control overlap.
 - Default `rbxassetid://12187375716` font asset on every text object, with bundled TTF and Roblox fallback.
 - Draggable, minimizable, closable, toggleable, and resizable window.
 - Animated opening, tab switching, toasts, rows, buttons, and progress bars.
