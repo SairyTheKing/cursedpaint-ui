@@ -10,7 +10,7 @@ Color3 = {
 	end,
 }
 
-local source = fs.readFile("cursedpaint-ui/Source.lua")
+local source = fs.readFile("Source.lua")
 local chunk, sourceError = loadstring(source, "Source.lua")
 assert(chunk, sourceError)
 
@@ -22,7 +22,7 @@ assert(library.Themes.Cursed ~= nil, "Cursed theme is missing")
 assert(library.Themes.Gojo ~= nil, "Gojo theme is missing")
 assert(library.Version ~= nil, "Version is missing")
 
-local showcase = fs.readFile("cursedpaint-ui/examples/showcase.client.lua")
+local showcase = fs.readFile("examples/showcase.client.lua")
 local showcaseChunk, showcaseError = loadstring(showcase, "showcase.client.lua")
 assert(showcaseChunk, showcaseError)
 

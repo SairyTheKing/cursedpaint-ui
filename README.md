@@ -7,7 +7,7 @@ It uses a goofy hand-painted style with `Enum.Font.FingerPaint`, chunky borders,
 ## Load
 
 ```lua
-local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/scripts/main/cursedpaint-ui/Source.lua"))()
+local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/Source.lua"))()
 ```
 
 Or put `Source.lua` into Roblox Studio as a ModuleScript:

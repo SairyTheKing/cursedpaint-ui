@@ -1,7 +1,7 @@
 -- CursedPaint UI showcase
 -- Paste into a LocalScript, or run through your testing environment.
 
-local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/scripts/main/cursedpaint-ui/Source.lua"))()
+local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/Source.lua"))()
 
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint UI",
