@@ -2,7 +2,6 @@
 -- Paste into a LocalScript or run through an executor with HttpGet enabled.
 
 local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/loader.lua"))()
-local DemoImage = CursedPaint:GetPlaceholderImage()
 
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
@@ -10,8 +9,6 @@ local Window = CursedPaint:CreateWindow({
 	MinSize = Vector2.new(640, 390),
 	Resizable = true,
 	Animated = true,
-	SideImage = DemoImage,
-	SideImageTransparency = 0.78,
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
@@ -21,24 +18,17 @@ local Combat = Window:AddTab("Combat")
 local Visuals = Window:AddTab("Visuals")
 local Settings = Window:AddTab("Settings")
 local Daily = Window:AddTab("Daily")
-Window:AddTab("-")
 
-Main:AddSection("CursedPaint UI")
-Main:AddBanner({
-	Title = "JJS Sketch Menu",
-	Caption = "Thick outlines, paper panels, yellow tabs, and cyan progress bars.",
-	Image = DemoImage,
-	ImageTransparency = 0.18,
-})
+Main:AddSection("Overview")
 Main:AddParagraph({
-	Title = "What this is",
-	Content = "A simple Roblox Luau UI library with tabs, flags, config, images, notifications, and script-friendly controls.",
+	Title = "CursedPaint UI",
+	Content = "A compact Luau UI library with tabs, config, notifications, and script-friendly controls.",
+	Height = 76,
 })
 Main:AddButton({
 	Title = "Notification",
 	Description = "Shows a themed popup.",
 	ButtonText = "SHOW",
-	Icon = DemoImage,
 	Callback = function()
 		Window:Notify({
 			Title = "CursedPaint",
@@ -60,7 +50,6 @@ Controls:AddToggle({
 	Description = "Boolean flag example.",
 	Flag = "auto_sprint",
 	Default = true,
-	Icon = DemoImage,
 	Callback = function(value)
 		Status:Set("Auto Sprint: " .. tostring(value))
 	end,
@@ -140,13 +129,6 @@ Combat:AddButton({
 })
 
 Visuals:AddSection("Visuals")
-Visuals:AddImage({
-	Title = "Image Row",
-	Caption = "Use an rbxassetid, rbxasset URL, or HTTP image with executor file APIs.",
-	Image = DemoImage,
-	Height = 120,
-	ImageTransparency = 0.08,
-})
 Visuals:AddColorPicker({
 	Title = "Accent Color",
 	Flag = "accent_color",
@@ -160,8 +142,8 @@ Visuals:AddButton({
 	Description = "Changes the faded image on the right side.",
 	ButtonText = "SET",
 	Callback = function()
-		Window:SetSideImage(DemoImage, 0.66)
-		Status:Set("Side image changed.")
+		Window:SetSideImage(CursedPaint:GetPlaceholderImage(), 0.82)
+		Status:Set("Side image set.")
 	end,
 })
 
@@ -227,21 +209,18 @@ Daily:AddQuest({
 	Title = "Roll 15 times",
 	Value = 0,
 	Max = 15,
-	Image = DemoImage,
 	ImageTransparency = 0.72,
 })
 Daily:AddQuest({
 	Title = "Use Special 15 times",
 	Value = 3,
 	Max = 15,
-	Image = DemoImage,
 	ImageTransparency = 0.78,
 })
 Daily:AddQuest({
 	Title = "Play for 15 minutes",
 	Value = 8,
 	Max = 15,
-	Image = DemoImage,
 	ImageTransparency = 0.82,
 })
 Daily:AddLabel("Refreshes in: 7h 29m 23s")

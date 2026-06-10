@@ -27,6 +27,7 @@ Options:
 - `ContentTop`: optional top content inset. Default reserves space for window buttons.
 - `ContentBottomInset`: optional bottom content inset. Default reserves space for the lower bar.
 - `SideImageWidth`: optional faded art width inside the content panel.
+- `AccentBars`: set to `true` to show the cyan decorative strips. Hidden by default.
 - `Position`: window position.
 - `Resizable`: set to `false` to hide the resize handle.
 - `Animated`: set to `false` to disable the opening animation for that window.

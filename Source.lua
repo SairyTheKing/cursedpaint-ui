@@ -3,7 +3,7 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.7.5"
+CursedPaint.Version = "0.7.6"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
 CursedPaint._downloadedFontAssets = {}
@@ -45,8 +45,8 @@ CursedPaint.Themes = {
 		TextureTransparency = 0.98,
 		GlowTransparency = 1,
 		Radius = 4,
-		StrokeThickness = 3,
-		ThinStrokeThickness = 2,
+		StrokeThickness = 2,
+		ThinStrokeThickness = 1,
 	},
 }
 
@@ -606,12 +606,9 @@ end
 
 local function stroke(parent, theme, thickness)
 	local defaultThickness = theme.StrokeThickness or 2
-	local thinThickness = theme.ThinStrokeThickness or math.max(defaultThickness - 1, 1)
 	local resolved = thickness or defaultThickness
 	if thickness and thickness <= 1 then
-		resolved = thinThickness
-	elseif thickness then
-		resolved = math.max(thickness, defaultThickness)
+		resolved = theme.ThinStrokeThickness or 1
 	end
 
 	return make("UIStroke", {
@@ -1130,8 +1127,9 @@ function CursedPaint:CreateWindow(options)
 	local parent = options.Parent or resolveParent()
 	assert(parent, "CursedPaint UI could not find a UI parent.")
 	local sidebarWidth = tonumber(options.SidebarWidth) or 190
-	local contentTop = tonumber(options.ContentTop) or 48
-	local contentBottomInset = tonumber(options.ContentBottomInset) or 44
+	local contentTop = tonumber(options.ContentTop) or 42
+	local contentBottomInset = tonumber(options.ContentBottomInset) or 18
+	local accentBars = options.AccentBars == true
 
 	local gui = make("ScreenGui", {
 		Name = options.GuiName or "CursedPaintUI",
@@ -1272,8 +1270,9 @@ function CursedPaint:CreateWindow(options)
 		BackgroundColor3 = theme.BarFill,
 		BackgroundTransparency = 0.1,
 		BorderSizePixel = 0,
-		Position = UDim2.new(0, sidebarWidth + 22, 1, -26),
-		Size = UDim2.new(1, -(sidebarWidth + 70), 0, 10),
+		Position = UDim2.new(0, sidebarWidth + 22, 1, -18),
+		Size = UDim2.new(1, -(sidebarWidth + 70), 0, 8),
+		Visible = accentBars,
 		ZIndex = 4,
 		Parent = root,
 	})
@@ -1295,6 +1294,7 @@ function CursedPaint:CreateWindow(options)
 		BorderSizePixel = 0,
 		Position = UDim2.fromOffset(14, 12),
 		Size = UDim2.new(1, -28, 0, 4),
+		Visible = accentBars,
 		ZIndex = 5,
 		Parent = root,
 	})

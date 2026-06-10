@@ -4,7 +4,7 @@ CursedPaint now ships with one default style:
 
 - `JJS`
 
-It is a sketch-menu style with thick black outlines, a pale yellow side menu, white/gray paper rows, yellow-orange selected tabs, and cyan progress bars.
+It is a sketch-menu style with clean ink outlines, a pale yellow side menu, white/gray paper rows, yellow-orange selected tabs, and cyan progress bars.
 
 ```lua
 local Window = CursedPaint:CreateWindow({
@@ -33,7 +33,7 @@ CursedPaint.Themes.JJS = {
 	ContentTransparency = 0.18,
 	RowTransparency = 0.08,
 	Radius = 4,
-	StrokeThickness = 3,
-	ThinStrokeThickness = 2,
+	StrokeThickness = 2,
+	ThinStrokeThickness = 1,
 }
 ```

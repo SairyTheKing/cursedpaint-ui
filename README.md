@@ -4,7 +4,7 @@
 
 CursedPaint UI is a simple Roblox Luau UI library for testing panels, script menus, settings pages, and showcase interfaces.
 
-It uses one JJS-style sketch-menu theme by default: thick black outlines, pale side tabs, white paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint text is attempted through a Roblox font asset, the bundled GitHub `.ttf`, Roblox `Font.fromName`, family paths, and enum fallback.
+It uses one JJS-style sketch-menu theme by default: clean ink outlines, pale side tabs, paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint text is attempted through a Roblox font asset, the bundled GitHub `.ttf`, Roblox `Font.fromName`, family paths, and enum fallback.
 
 ## Load
 
@@ -55,7 +55,7 @@ Main:AddSlider({
 ## Features
 
 - One default `JJS` sketch theme.
-- Thick black outlines across windows, tabs, rows, buttons, inputs, and bars.
+- Clean ink outlines across windows, tabs, rows, buttons, inputs, and bars.
 - Roomier rows and reserved window-control space to avoid text/control overlap.
 - Default `rbxassetid://12187375716` font asset on every text object, with bundled TTF and Roblox fallback.
 - Draggable, minimizable, closable, toggleable, and resizable window.
