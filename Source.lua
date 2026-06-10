@@ -3,7 +3,7 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.2.0"
+CursedPaint.Version = "0.3.0"
 
 CursedPaint.Themes = {
 	Paper = {
@@ -172,6 +172,15 @@ local function handFont()
 	return Enum.Font.GothamBold
 end
 
+local function applyHandFont(instance)
+	instance.Font = handFont()
+	pcall(function()
+		if Font then
+			instance.FontFace = Font.new("rbxasset://fonts/families/FingerPaint.json")
+		end
+	end)
+end
+
 local function bodyFont()
 	return Enum.Font.Gotham
 end
@@ -333,7 +342,7 @@ local function protectGui(gui)
 end
 
 local function setHandText(label, size, align)
-	label.Font = handFont()
+	applyHandFont(label)
 	label.TextSize = size or 18
 	label.TextWrapped = true
 	label.TextXAlignment = align or Enum.TextXAlignment.Left
@@ -360,6 +369,7 @@ local function makeButton(parent, text, theme, width)
 		Size = UDim2.fromOffset(width or 96, 31),
 		Parent = parent,
 	})
+	applyHandFont(button)
 	stroke(button, theme, 2)
 
 	button.MouseEnter:Connect(function()
@@ -675,6 +685,7 @@ function Window:CreateTab(title, icon)
 		Size = UDim2.new(1, 0, 0, 28),
 		Parent = self.TabsBar,
 	})
+	applyHandFont(button)
 	stroke(button, theme, 1)
 
 	local gradient = make("UIGradient", {
@@ -931,6 +942,58 @@ function Tab:Label(text)
 	}
 end
 
+function Tab:Divider(text)
+	local theme = self.Window.Theme
+	local row = make("Frame", {
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 0, text and 30 or 16),
+		Parent = self.Page,
+	})
+
+	local line = make("Frame", {
+		BackgroundColor3 = theme.Ink,
+		BackgroundTransparency = 0.15,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 8, 0.5, -1),
+		Size = UDim2.new(1, -16, 0, 2),
+		Parent = row,
+	})
+
+	local label
+	if text then
+		label = make("TextLabel", {
+			BackgroundColor3 = theme.Panel,
+			BackgroundTransparency = 0,
+			Text = tostring(text),
+			TextColor3 = theme.Text,
+			Position = UDim2.fromOffset(10, 0),
+			Size = UDim2.fromOffset(160, 30),
+			Parent = row,
+		})
+		setHandText(label, 16)
+	end
+
+	self.Window:_bindTheme(function(nextTheme)
+		line.BackgroundColor3 = nextTheme.Ink
+		if label then
+			label.BackgroundColor3 = nextTheme.Panel
+			label.TextColor3 = nextTheme.Text
+		end
+	end)
+
+	return row
+end
+
+function Tab:Space(height)
+	return make("Frame", {
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 0, height or 8),
+		Parent = self.Page,
+	})
+end
+
 function Tab:Paragraph(options)
 	options = options or {}
 	local theme = self.Window.Theme
@@ -1183,6 +1246,7 @@ function Tab:Slider(options)
 		Size = UDim2.fromOffset(80, 24),
 		Parent = row,
 	})
+	applyHandFont(valueLabel)
 	local track, fill = createProgressBar(row, theme, 48)
 	local dragging = false
 	local userInput = service("UserInputService")
@@ -1231,6 +1295,86 @@ function Tab:Slider(options)
 		track.BackgroundColor3 = nextTheme.Bar
 		fill.BackgroundColor3 = nextTheme.BarFill
 		updateStroke(track, nextTheme)
+	end)
+
+	return {
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
+		Get = function()
+			return value
+		end,
+		Flag = flag,
+		Instance = row,
+	}
+end
+
+function Tab:Stepper(options)
+	options = options or {}
+	local theme = self.Window.Theme
+	local minValue = tonumber(options.Min) or 0
+	local maxValue = tonumber(options.Max) or 10
+	local step = tonumber(options.Step) or 1
+	local flag = normalizeFlag(options.Title, options.Flag)
+	local value = roundToStep(clampNumber(options.Default or minValue, minValue, maxValue), step)
+	local row = self:_row(56)
+	local title = rowTitle(row, options.Title or "Stepper", theme, 2, 154)
+
+	local minus = makeButton(row, "-", theme, 32)
+	minus.AnchorPoint = Vector2.new(1, 0.5)
+	minus.Position = UDim2.new(1, -116, 0.5, 0)
+
+	local valueLabel = make("TextLabel", {
+		BackgroundColor3 = theme.PanelAlt,
+		BackgroundTransparency = 0.05,
+		BorderSizePixel = 0,
+		Text = tostring(value),
+		TextColor3 = theme.Text,
+		TextSize = 18,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -45, 0.5, 0),
+		Size = UDim2.fromOffset(62, 31),
+		Parent = row,
+	})
+	applyHandFont(valueLabel)
+	stroke(valueLabel, theme, 1)
+
+	local plus = makeButton(row, "+", theme, 32)
+	plus.AnchorPoint = Vector2.new(1, 0.5)
+	plus.Position = UDim2.new(1, -8, 0.5, 0)
+
+	local function set(nextValue, silent)
+		value = roundToStep(clampNumber(nextValue, minValue, maxValue), step)
+		self.Window:_setFlag(flag, value)
+		valueLabel.Text = tostring(value)
+		if not silent then
+			call(options.Callback, value)
+		end
+	end
+
+	minus.MouseButton1Click:Connect(function()
+		set(value - step)
+	end)
+
+	plus.MouseButton1Click:Connect(function()
+		set(value + step)
+	end)
+
+	self.Window:_registerFlag(flag, set)
+	set(value, true)
+
+	self.Window:_bindTheme(function(nextTheme)
+		title.TextColor3 = nextTheme.Text
+		minus.BackgroundColor3 = nextTheme.Panel
+		minus.TextColor3 = nextTheme.Text
+		valueLabel.BackgroundColor3 = nextTheme.PanelAlt
+		valueLabel.TextColor3 = nextTheme.Text
+		plus.BackgroundColor3 = nextTheme.Panel
+		plus.TextColor3 = nextTheme.Text
+		updateStroke(minus, nextTheme)
+		updateStroke(valueLabel, nextTheme)
+		updateStroke(plus, nextTheme)
 	end)
 
 	return {
@@ -1296,6 +1440,7 @@ function Tab:Dropdown(options)
 			ZIndex = 11,
 			Parent = menu,
 		})
+		applyHandFont(option)
 		option.MouseButton1Click:Connect(function()
 			set(choice)
 			open = false
@@ -1339,6 +1484,150 @@ function Tab:Dropdown(options)
 		end,
 		Get = function()
 			return value
+		end,
+		Flag = flag,
+		Instance = row,
+	}
+end
+
+function Tab:MultiDropdown(options)
+	options = options or {}
+	local theme = self.Window.Theme
+	local choices = options.Options or options.Values or {}
+	local flag = normalizeFlag(options.Title, options.Flag)
+	local selected = {}
+	local open = false
+	local closedHeight = 56
+	local row = self:_row(closedHeight)
+	local title = rowTitle(row, options.Title or "Multi Dropdown", theme, 2, 146)
+	local button = makeButton(row, "...", theme, 134)
+	button.AnchorPoint = Vector2.new(1, 0.5)
+	button.Position = UDim2.new(1, -8, 0, 28)
+	button.TextSize = 14
+
+	local menu = make("Frame", {
+		BackgroundColor3 = theme.Panel,
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		Position = UDim2.fromOffset(8, closedHeight),
+		Size = UDim2.new(1, -16, 0, 0),
+		Visible = false,
+		ZIndex = 10,
+		Parent = row,
+	})
+	stroke(menu, theme, 2)
+	list(menu, 0)
+
+	local optionButtons = {}
+
+	local function selectedList()
+		local output = {}
+		for _, choice in ipairs(choices) do
+			if selected[choice] then
+				table.insert(output, choice)
+			end
+		end
+		return output
+	end
+
+	local function updateButton()
+		local output = selectedList()
+		if #output == 0 then
+			button.Text = "None"
+		elseif #output == 1 then
+			button.Text = tostring(output[1])
+		else
+			button.Text = tostring(#output) .. " selected"
+		end
+
+		for choice, option in pairs(optionButtons) do
+			option.Text = (selected[choice] and "[x] " or "[ ] ") .. tostring(choice)
+			option.BackgroundTransparency = selected[choice] and 0.02 or theme.RowTransparency
+		end
+	end
+
+	local function set(nextValue, silent)
+		selected = {}
+		if kindOf(nextValue) == "table" then
+			for key, item in pairs(nextValue) do
+				if type(key) == "number" then
+					selected[item] = true
+				elseif item == true then
+					selected[key] = true
+				end
+			end
+		elseif nextValue ~= nil then
+			selected[nextValue] = true
+		end
+
+		local output = selectedList()
+		self.Window:_setFlag(flag, output)
+		updateButton()
+		if not silent then
+			call(options.Callback, output)
+		end
+	end
+
+	for _, choice in ipairs(choices) do
+		local option = make("TextButton", {
+			AutoButtonColor = false,
+			BackgroundColor3 = theme.Panel,
+			BackgroundTransparency = theme.RowTransparency,
+			BorderSizePixel = 0,
+			Font = handFont(),
+			Text = "[ ] " .. tostring(choice),
+			TextColor3 = theme.Text,
+			TextSize = 15,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Size = UDim2.new(1, 0, 0, 28),
+			ZIndex = 11,
+			Parent = menu,
+		})
+		applyHandFont(option)
+		padding(option, 8, 0, 8, 0)
+		optionButtons[choice] = option
+		option.MouseButton1Click:Connect(function()
+			selected[choice] = not selected[choice]
+			local output = selectedList()
+			self.Window:_setFlag(flag, output)
+			updateButton()
+			call(options.Callback, output)
+		end)
+	end
+
+	button.MouseButton1Click:Connect(function()
+		open = not open
+		menu.Visible = open
+		local menuHeight = #choices * 28
+		menu.Size = UDim2.new(1, -16, 0, menuHeight)
+		row.Size = UDim2.new(1, 0, 0, open and (closedHeight + menuHeight + 8) or closedHeight)
+	end)
+
+	self.Window:_registerFlag(flag, set)
+	set(options.Default or {}, true)
+
+	self.Window:_bindTheme(function(nextTheme)
+		theme = nextTheme
+		title.TextColor3 = nextTheme.Text
+		button.BackgroundColor3 = nextTheme.Panel
+		button.BackgroundTransparency = nextTheme.RowTransparency
+		button.TextColor3 = nextTheme.Text
+		menu.BackgroundColor3 = nextTheme.Panel
+		updateStroke(button, nextTheme)
+		updateStroke(menu, nextTheme)
+		for _, option in pairs(optionButtons) do
+			option.BackgroundColor3 = nextTheme.Panel
+			option.TextColor3 = nextTheme.Text
+		end
+		updateButton()
+	end)
+
+	return {
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
+		Get = function()
+			return selectedList()
 		end,
 		Flag = flag,
 		Instance = row,
@@ -1563,6 +1852,28 @@ function Tab:ThemeDropdown(title)
 	})
 end
 
+Window.AddTab = Window.CreateTab
+Window.Tab = Window.CreateTab
+
+Tab.AddSection = Tab.Section
+Tab.AddLabel = Tab.Label
+Tab.AddParagraph = Tab.Paragraph
+Tab.AddQuest = Tab.Quest
+Tab.AddProgress = Tab.Progress
+Tab.AddButton = Tab.Button
+Tab.AddToggle = Tab.Toggle
+Tab.AddSlider = Tab.Slider
+Tab.AddStepper = Tab.Stepper
+Tab.AddDropdown = Tab.Dropdown
+Tab.AddMultiDropdown = Tab.MultiDropdown
+Tab.AddTextbox = Tab.Textbox
+Tab.AddInput = Tab.Textbox
+Tab.AddKeybind = Tab.Keybind
+Tab.AddColorPicker = Tab.ColorPicker
+Tab.AddDivider = Tab.Divider
+Tab.AddSpace = Tab.Space
+Tab.AddThemeDropdown = Tab.ThemeDropdown
+
 function CursedPaint:Notify(options)
 	local window = CursedPaint._lastWindow
 	if window then
@@ -1576,6 +1887,10 @@ function CursedPaint:CreateWindow(options)
 	local window = createWindow(self, options)
 	CursedPaint._lastWindow = window
 	return window
+end
+
+function CursedPaint:New(options)
+	return self:CreateWindow(options)
 end
 
 return CursedPaint

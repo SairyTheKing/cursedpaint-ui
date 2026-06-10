@@ -9,194 +9,153 @@ local Window = CursedPaint:CreateWindow({
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
-local Daily = Window:CreateTab("Daily")
-local Weekly = Window:CreateTab("Weekly")
-local Stats = Window:CreateTab("Stats")
-local Gamemodes = Window:CreateTab("Gamemodes")
-local General = Window:CreateTab("General")
-local Honored = Window:CreateTab("Honored One")
-local Vessel = Window:CreateTab("Vessel")
-local Gambler = Window:CreateTab("Restless Gambler")
-local Shadows = Window:CreateTab("Ten Shadows")
-local Perfection = Window:CreateTab("Perfection")
-local Blood = Window:CreateTab("Blood Manipulator")
-local Switcher = Window:CreateTab("Switcher")
-Window:CreateTab("-")
+local Main = Window:AddTab("Main")
+local Controls = Window:AddTab("Controls")
+local Combat = Window:AddTab("Combat")
+local Visuals = Window:AddTab("Visuals")
+local Config = Window:AddTab("Config")
+local Daily = Window:AddTab("Daily")
+Window:AddTab("-")
 
-Daily:Quest({
-	Title = "Roll 15 times",
-	Value = 0,
-	Max = 15,
+Main:AddSection("CursedPaint UI")
+Main:AddParagraph({
+	Title = "Testing Library",
+	Content = "This is a real control library with a flat paper menu style, FingerPaint text, sketch borders, tabs, callbacks, flags, config, and notifications.",
 })
-
-Daily:Quest({
-	Title = "Use Special 15 times",
-	Value = 0,
-	Max = 15,
+Main:AddButton({
+	Title = "Notification",
+	Description = "Shows a paper-style popup.",
+	ButtonText = "SHOW",
+	Callback = function()
+		Window:Notify({
+			Title = "CursedPaint",
+			Content = "Button callbacks work.",
+		})
+	end,
 })
-
-Daily:Quest({
-	Title = "Play for 15 minutes",
-	Value = 0,
-	Max = 15,
-})
-
-Daily:Label("Refreshes in: 7h 29m 23s")
-Daily:Progress({
+Main:AddDivider("Status")
+local Status = Main:AddLabel("Ready.")
+Main:AddProgress({
 	Title = "Total Progress",
 	Value = 50,
 	Max = 100,
 })
 
-Weekly:Section("Weekly")
-Weekly:Quest({
-	Title = "Win 10 rounds",
-	Value = 3,
-	Max = 10,
-})
-Weekly:Quest({
-	Title = "Deal 5000 damage",
-	Value = 2400,
-	Max = 5000,
-})
-Weekly:Progress({
-	Title = "Total Progress",
-	Value = 38,
-	Max = 100,
-})
-
-Stats:Section("Stats")
-Stats:Label("Kills: 128")
-Stats:Label("Wins: 17")
-Stats:Label("Favorite mode: Silly")
-
-Gamemodes:Section("Gamemodes")
-Gamemodes:Button({
-	Title = "Casual",
-	ButtonText = "PLAY",
-	Callback = function()
-		Window:Notify({
-			Title = "Gamemodes",
-			Content = "Casual selected.",
-		})
-	end,
-})
-Gamemodes:Button({
-	Title = "Ranked",
-	ButtonText = "PLAY",
-	Callback = function()
-		Window:Notify({
-			Title = "Gamemodes",
-			Content = "Ranked selected.",
-		})
-	end,
-})
-
-General:Section("General")
-General:Toggle({
+Controls:AddSection("Basic Controls")
+Controls:AddToggle({
 	Title = "Auto Sprint",
+	Description = "Boolean flag example.",
 	Flag = "auto_sprint",
 	Default = true,
+	Callback = function(value)
+		Status:Set("Auto Sprint: " .. tostring(value))
+	end,
 })
-General:Slider({
-	Title = "Volume",
-	Flag = "volume",
-	Min = 0,
+Controls:AddSlider({
+	Title = "Walk Speed",
+	Flag = "walk_speed",
+	Min = 16,
 	Max = 100,
-	Step = 5,
-	Default = 50,
+	Step = 1,
+	Default = 24,
+	Callback = function(value)
+		Status:Set("Walk Speed: " .. tostring(value))
+	end,
 })
-General:Dropdown({
-	Title = "Menu Theme",
-	Flag = "menu_theme",
+Controls:AddStepper({
+	Title = "Combo Limit",
+	Flag = "combo_limit",
+	Min = 1,
+	Max = 10,
+	Step = 1,
+	Default = 4,
+	Callback = function(value)
+		Status:Set("Combo Limit: " .. tostring(value))
+	end,
+})
+Controls:AddTextbox({
+	Title = "Shout Text",
+	Flag = "shout_text",
+	Placeholder = "type then press enter",
+	Default = "domain expansion",
+	Callback = function(text)
+		Window:Notify({
+			Title = "Textbox",
+			Content = text,
+		})
+	end,
+})
+
+Combat:AddSection("Dropdowns")
+Combat:AddDropdown({
+	Title = "Character",
+	Flag = "character",
+	Options = {
+		"Honored One",
+		"Vessel",
+		"Restless Gambler",
+		"Ten Shadows",
+		"Perfection",
+		"Blood Manipulator",
+		"Switcher",
+	},
+	Default = "Vessel",
+	Callback = function(value)
+		Status:Set("Character: " .. tostring(value))
+	end,
+})
+Combat:AddMultiDropdown({
+	Title = "Enabled Moves",
+	Flag = "enabled_moves",
+	Options = { "M1", "Special", "Ultimate", "Dash", "Counter" },
+	Default = { "M1", "Dash" },
+	Callback = function(values)
+		Status:Set("Enabled moves: " .. tostring(#values))
+	end,
+})
+Combat:AddButton({
+	Title = "Fake Attack",
+	Description = "Example command button.",
+	ButtonText = "USE",
+	Callback = function()
+		Window:Notify({
+			Title = "Combat",
+			Content = "Fake attack fired.",
+		})
+	end,
+})
+
+Visuals:AddSection("Visuals")
+Visuals:AddColorPicker({
+	Title = "Bar Color",
+	Flag = "bar_color",
+	Default = Color3.fromRGB(21, 205, 244),
+	Callback = function(color)
+		Status:Set("Picked color: " .. tostring(color))
+	end,
+})
+Visuals:AddDropdown({
+	Title = "Theme",
+	Flag = "theme_select",
 	Options = { "Paper", "Smoke", "Blood", "Void", "Forest", "Candy" },
 	Default = "Paper",
 	Callback = function(theme)
 		Window:SetTheme(theme)
 	end,
 })
-
-Honored:Section("Honored One")
-Honored:Quest({
-	Title = "Land Blue 5 times",
-	Value = 1,
-	Max = 5,
-})
-Honored:Quest({
-	Title = "Hit a reversal",
-	Value = 0,
-	Max = 1,
-})
-
-Vessel:Section("Vessel")
-Vessel:Toggle({
-	Title = "Show Move Tips",
-	Flag = "vessel_tips",
-	Default = false,
-})
-Vessel:Slider({
-	Title = "Rage",
-	Flag = "rage",
-	Min = 0,
-	Max = 100,
-	Step = 1,
-	Default = 25,
-})
-
-Gambler:Section("Restless Gambler")
-Gambler:Button({
-	Title = "Spin Luck",
-	ButtonText = "ROLL",
-	Callback = function()
-		Window:Notify({
-			Title = "Jackpot",
-			Content = "You rolled " .. tostring(math.random(1, 777)) .. ".",
-		})
-	end,
-})
-
-Shadows:Section("Ten Shadows")
-Shadows:ColorPicker({
-	Title = "Shadow Color",
-	Flag = "shadow_color",
-	Default = Color3.fromRGB(21, 205, 244),
-})
-
-Perfection:Section("Perfection")
-Perfection:Textbox({
-	Title = "Shout",
-	Flag = "shout",
-	Placeholder = "type something",
-	Default = "idle transfiguration",
-	Callback = function(text)
-		Window:Notify({
-			Title = "Shout",
-			Content = text,
-		})
-	end,
-})
-
-Blood:Section("Blood Manipulator")
-Blood:Slider({
-	Title = "Blood Flow",
-	Flag = "blood_flow",
-	Min = 0,
-	Max = 100,
-	Step = 10,
-	Default = 70,
-})
-
-Switcher:Section("Switcher")
-Switcher:Keybind({
+Visuals:AddKeybind({
 	Title = "Toggle UI",
-	Flag = "toggle_ui",
+	Flag = "toggle_key",
 	Default = Enum.KeyCode.RightControl,
 	Pressed = function()
 		Window:SetVisible(false)
 	end,
 })
-Switcher:Button({
+
+Config:AddSection("Config")
+Config:AddButton({
 	Title = "Save Config",
+	Description = "Uses writefile if available, memory fallback otherwise.",
 	ButtonText = "SAVE",
 	Callback = function()
 		local saved = Window:SaveConfig("showcase")
@@ -206,8 +165,9 @@ Switcher:Button({
 		})
 	end,
 })
-Switcher:Button({
+Config:AddButton({
 	Title = "Load Config",
+	Description = "Restores flags and theme.",
 	ButtonText = "LOAD",
 	Callback = function()
 		local ok, message = Window:LoadConfig("showcase")
@@ -217,9 +177,32 @@ Switcher:Button({
 		})
 	end,
 })
+Config:AddLabel("RightControl toggles the UI.")
+
+Daily:AddQuest({
+	Title = "Roll 15 times",
+	Value = 0,
+	Max = 15,
+})
+Daily:AddQuest({
+	Title = "Use Special 15 times",
+	Value = 3,
+	Max = 15,
+})
+Daily:AddQuest({
+	Title = "Play for 15 minutes",
+	Value = 8,
+	Max = 15,
+})
+Daily:AddLabel("Refreshes in: 7h 29m 23s")
+Daily:AddProgress({
+	Title = "Total Progress",
+	Value = 50,
+	Max = 100,
+})
 
 Window:Notify({
 	Title = "CursedPaint",
-	Content = "Quest-style showcase loaded.",
+	Content = "Full UI library showcase loaded.",
 	Duration = 3,
 })

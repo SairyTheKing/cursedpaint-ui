@@ -24,9 +24,12 @@ Options:
 
 ```lua
 local Daily = Window:CreateTab("Daily")
+local Main = Window:AddTab("Main")
 ```
 
 Tabs appear on the left side as vertical text buttons.
+
+`AddTab` and `CreateTab` are the same.
 
 ## Section
 
@@ -126,6 +129,24 @@ local Slider = Daily:Slider({
 Slider:Set(80)
 ```
 
+## Stepper
+
+```lua
+local Stepper = Daily:Stepper({
+	Title = "Combo Limit",
+	Flag = "combo_limit",
+	Min = 1,
+	Max = 10,
+	Step = 1,
+	Default = 4,
+	Callback = function(value)
+		print(value)
+	end,
+})
+
+Stepper:Set(6)
+```
+
 ## Dropdown
 
 ```lua
@@ -140,6 +161,22 @@ local Dropdown = Daily:Dropdown({
 })
 
 Dropdown:Set("Ranked")
+```
+
+## MultiDropdown
+
+```lua
+local Multi = Daily:MultiDropdown({
+	Title = "Enabled Moves",
+	Flag = "moves",
+	Options = { "M1", "Special", "Ultimate", "Dash" },
+	Default = { "M1", "Dash" },
+	Callback = function(values)
+		print(#values)
+	end,
+})
+
+Multi:Set({ "Special", "Ultimate" })
 ```
 
 ## Textbox
@@ -228,4 +265,16 @@ Window.Flags
 
 ```lua
 Window:Destroy()
+```
+
+## Add Aliases
+
+Every control also has an `Add...` alias:
+
+```lua
+Tab:AddButton(...)
+Tab:AddToggle(...)
+Tab:AddSlider(...)
+Tab:AddDropdown(...)
+Tab:AddMultiDropdown(...)
 ```

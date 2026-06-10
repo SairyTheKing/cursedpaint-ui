@@ -25,18 +25,21 @@ local Window = CursedPaint:CreateWindow({
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
-local Daily = Window:CreateTab("Daily")
+local Main = Window:AddTab("Main")
 
-Daily:Quest({
-	Title = "Roll 15 times",
-	Value = 0,
-	Max = 15,
+Main:AddToggle({
+	Title = "Auto Sprint",
+	Flag = "auto_sprint",
+	Default = true,
 })
 
-Daily:Progress({
-	Title = "Total Progress",
-	Value = 50,
+Main:AddSlider({
+	Title = "Walk Speed",
+	Flag = "walk_speed",
+	Min = 16,
 	Max = 100,
+	Step = 1,
+	Default = 24,
 })
 ```
 
@@ -50,6 +53,7 @@ Full example: [showcase.client.lua](examples/showcase.client.lua)
 - Draggable window.
 - Minimize, close, and toggle key.
 - Quest rows with counters and bars.
+- Buttons, toggles, sliders, steppers, dropdowns, multi-dropdowns, textboxes, keybinds, and color pickers.
 - Notifications.
 - Config save/load with `writefile` when available and memory fallback otherwise.
 - Themes: `Paper`, `Smoke`, `Blood`, `Void`, `Forest`, `Candy`.
@@ -64,7 +68,9 @@ Controls:
 - `Button`
 - `Toggle`
 - `Slider`
+- `Stepper`
 - `Dropdown`
+- `MultiDropdown`
 - `Textbox`
 - `Keybind`
 - `ColorPicker`
