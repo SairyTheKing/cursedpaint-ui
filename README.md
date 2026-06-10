@@ -4,7 +4,7 @@
 
 CursedPaint UI is a simple Roblox Luau UI library for testing panels, script menus, settings pages, and showcase interfaces.
 
-It uses one JJS-style sketch-menu theme by default: thick black outlines, pale side tabs, white paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint-style text is attempted when Roblox supports it.
+It uses one JJS-style sketch-menu theme by default: thick black outlines, pale side tabs, white paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint text is attempted through Roblox `Font.fromName`, family paths, and enum fallback.
 
 ## Load
 
@@ -56,7 +56,7 @@ Main:AddSlider({
 
 - One default `JJS` sketch theme.
 - Thick black outlines across windows, tabs, rows, buttons, inputs, and bars.
-- FingerPaint font family attempt on every text object, with Roblox font fallback.
+- FingerPaint loader on every text object, with custom font asset support and Roblox fallback.
 - Draggable, minimizable, closable, toggleable, and resizable window.
 - Animated opening, tab switching, toasts, rows, buttons, and progress bars.
 - Tabs, sections, labels, paragraphs, images, banners, quests, and progress bars.
@@ -88,6 +88,19 @@ Window:LoadConfig("main")
 ```
 
 Controls with a `Flag` are saved into `Window.Flags`.
+
+## Font
+
+```lua
+Window:SetFont("FingerPaint")
+print(CursedPaint:GetFontStatus().Method)
+```
+
+If your client still shows a normal Roblox font, the executor/client is probably missing that font family. Import a font asset and use:
+
+```lua
+Window:SetFont("rbxassetid://YOUR_FONT_ASSET_ID")
+```
 
 ## Note
 

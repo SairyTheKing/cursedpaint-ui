@@ -3,11 +3,18 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.7.0"
+CursedPaint.Version = "0.7.1"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
 CursedPaint._fontFaceCache = {}
 CursedPaint.Font = "FingerPaint"
+CursedPaint.FontFace = nil
+CursedPaint._fontStatus = {
+	Requested = "FingerPaint",
+	Resolved = false,
+	Method = "pending",
+	Value = "FingerPaint",
+}
 CursedPaint.Motion = {
 	Enabled = true,
 	Speed = 1,
@@ -98,84 +105,201 @@ local function resolveEnumFont(value)
 	return nil
 end
 
-local FONT_FAMILIES = {
-	FingerPaint = "rbxasset://fonts/families/FingerPaint.json",
-	["Finger Paint"] = "rbxasset://fonts/families/FingerPaint.json",
-	PatrickHand = "rbxasset://fonts/families/PatrickHand.json",
-	["Patrick Hand"] = "rbxasset://fonts/families/PatrickHand.json",
-	PermanentMarker = "rbxasset://fonts/families/PermanentMarker.json",
-	["Permanent Marker"] = "rbxasset://fonts/families/PermanentMarker.json",
+local FONT_NAME_ALIASES = {
+	fingerpaint = { "Finger Paint", "FingerPaint", "Fingerpaint" },
+	patrickhand = { "Patrick Hand", "PatrickHand" },
+	permanentmarker = { "Permanent Marker", "PermanentMarker" },
 }
 
-local function fontFamilyPath(value)
+local FONT_FAMILY_PATHS = {
+	fingerpaint = {
+		"rbxasset://fonts/families/FingerPaint.json",
+		"rbxasset://fonts/families/Fingerpaint.json",
+		"rbxasset://fonts/families/fingerpaint.json",
+	},
+	patrickhand = {
+		"rbxasset://fonts/families/PatrickHand.json",
+		"rbxasset://fonts/families/Patrickhand.json",
+	},
+	permanentmarker = {
+		"rbxasset://fonts/families/PermanentMarker.json",
+		"rbxasset://fonts/families/Permanentmarker.json",
+	},
+}
+
+local function fontLookupKey(value)
+	return tostring(value or ""):gsub("[%s_%-]+", ""):lower()
+end
+
+local function setFontStatus(requested, resolved, method, value)
+	CursedPaint._fontStatus = {
+		Requested = requested or CursedPaint.Font or "FingerPaint",
+		Resolved = resolved == true,
+		Method = method or "unknown",
+		Value = value,
+	}
+end
+
+local function addFontCandidate(candidates, seen, kind, value)
+	if value == nil or value == "" then
+		return
+	end
+
+	local id = kind .. ":" .. tostring(value)
+	if seen[id] then
+		return
+	end
+
+	seen[id] = true
+	table.insert(candidates, {
+		Kind = kind,
+		Value = value,
+	})
+end
+
+local function fontCandidates(value)
 	local text = tostring(value or "")
+	local candidates = {}
+	local seen = {}
+
 	if text == "" then
-		return nil
+		return candidates
 	end
 
 	if text:match("^rbxasset://") or text:match("^rbxassetid://") then
-		return text
+		addFontCandidate(candidates, seen, "path", text)
+		return candidates
 	end
 
 	if text:match("^%d+$") then
-		return "rbxassetid://" .. text
+		addFontCandidate(candidates, seen, "path", "rbxassetid://" .. text)
+		return candidates
 	end
 
-	if FONT_FAMILIES[text] then
-		return FONT_FAMILIES[text]
+	local key = fontLookupKey(text)
+	local aliases = FONT_NAME_ALIASES[key] or { text }
+	for _, name in ipairs(aliases) do
+		addFontCandidate(candidates, seen, "name", name)
 	end
 
-	local compact = text:gsub("[%s_%-]+", "")
-	return FONT_FAMILIES[compact]
+	for _, path in ipairs(FONT_FAMILY_PATHS[key] or {}) do
+		addFontCandidate(candidates, seen, "path", path)
+	end
+
+	addFontCandidate(candidates, seen, "name", text)
+	return candidates
 end
 
-local function resolveFontFace(value)
-	local kind = kindOf(value)
-	if kind == "Font" then
-		return value
+local function cacheFontFace(key, requested, method, value, face)
+	CursedPaint._fontFaceCache[key] = face
+	setFontStatus(requested, true, method, value)
+	return face
+end
+
+local function fontFromName(name, requested)
+	local key = "name:" .. tostring(name)
+	if CursedPaint._fontFaceCache[key] then
+		setFontStatus(requested, true, "Font.fromName cache", name)
+		return CursedPaint._fontFaceCache[key]
 	end
 
-	if kind == "EnumItem" then
-		local ok, face = pcall(function()
-			if Font and Font.fromEnum then
-				return Font.fromEnum(value)
-			end
+	local ok, face = pcall(function()
+		if not Font or not Font.fromName then
 			return nil
-		end)
-		return ok and face or nil
+		end
+
+		if Enum and Enum.FontWeight and Enum.FontStyle then
+			return Font.fromName(name, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		end
+
+		return Font.fromName(name)
+	end)
+
+	if ok and face then
+		return cacheFontFace(key, requested, "Font.fromName", name, face)
 	end
 
-	local path = fontFamilyPath(value)
-	if not path then
-		return nil
-	end
+	return nil
+end
 
-	if CursedPaint._fontFaceCache[path] then
-		return CursedPaint._fontFaceCache[path]
+local function fontFromPath(path, requested)
+	local key = "path:" .. tostring(path)
+	if CursedPaint._fontFaceCache[key] then
+		setFontStatus(requested, true, "Font.new cache", path)
+		return CursedPaint._fontFaceCache[key]
 	end
 
 	local ok, face = pcall(function()
 		if not Font then
 			return nil
 		end
-		return Font.new(path, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+
+		if Enum and Enum.FontWeight and Enum.FontStyle then
+			return Font.new(path, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		end
+
+		return Font.new(path)
 	end)
 
 	if ok and face then
-		CursedPaint._fontFaceCache[path] = face
-		return face
+		return cacheFontFace(key, requested, "Font.new", path, face)
 	end
 
 	local okSimple, simpleFace = pcall(function()
 		if not Font then
 			return nil
 		end
+
 		return Font.new(path)
 	end)
 
 	if okSimple and simpleFace then
-		CursedPaint._fontFaceCache[path] = simpleFace
-		return simpleFace
+		return cacheFontFace(key, requested, "Font.new", path, simpleFace)
+	end
+
+	return nil
+end
+
+local function resolveFontFace(value)
+	local kind = kindOf(value)
+	if kind == "Font" then
+		setFontStatus(value, true, "FontFace", value)
+		return value
+	end
+
+	if kind == "EnumItem" then
+		local key = "enum:" .. tostring(value)
+		if CursedPaint._fontFaceCache[key] then
+			setFontStatus(value, true, "Font.fromEnum cache", tostring(value))
+			return CursedPaint._fontFaceCache[key]
+		end
+
+		local ok, face = pcall(function()
+			if Font and Font.fromEnum then
+				return Font.fromEnum(value)
+			end
+			return nil
+		end)
+
+		if ok and face then
+			return cacheFontFace(key, value, "Font.fromEnum", tostring(value), face)
+		end
+
+		return nil
+	end
+
+	for _, candidate in ipairs(fontCandidates(value)) do
+		local face = nil
+
+		if candidate.Kind == "name" then
+			face = fontFromName(candidate.Value, value)
+		elseif candidate.Kind == "path" then
+			face = fontFromPath(candidate.Value, value)
+		end
+
+		if face then
+			return face
+		end
 	end
 
 	return nil
@@ -226,11 +350,39 @@ local function applyHandFont(instance)
 		end
 	end
 
-	pcall(function()
+	local okEnumFace, enumFace = pcall(function()
 		if Font and Font.fromEnum then
-			instance.FontFace = Font.fromEnum(font)
+			return Font.fromEnum(font)
 		end
+		return nil
 	end)
+
+	if okEnumFace and enumFace then
+		local applied = pcall(function()
+			instance.FontFace = enumFace
+		end)
+
+		if applied then
+			setFontStatus(CursedPaint.Font, true, "Font.fromEnum fallback", tostring(font))
+			return
+		end
+	end
+
+	setFontStatus(CursedPaint.Font, false, "Enum.Font fallback", tostring(font))
+end
+
+function CursedPaint:GetFontStatus()
+	local status = CursedPaint._fontStatus or {}
+	return {
+		Requested = status.Requested or CursedPaint.Font or "FingerPaint",
+		Resolved = status.Resolved == true,
+		Method = status.Method or "unknown",
+		Value = status.Value,
+	}
+end
+
+function CursedPaint:GetFontHelp()
+	return "If FingerPaint falls back on your client, import a font and call Window:SetFont(\"rbxassetid://YOUR_FONT_ASSET_ID\")."
 end
 
 local function bodyFont()
@@ -1140,6 +1292,8 @@ function Window:_disconnectAll()
 end
 
 function CursedPaint:SetFont(font, fontFace)
+	local requested = fontFace or font or "FingerPaint"
+	setFontStatus(requested, false, "pending", requested)
 	CursedPaint.Font = resolveEnumFont(font) or font or "FingerPaint"
 	CursedPaint.FontFace = resolveFontFace(fontFace) or fontFace
 	return CursedPaint.Font

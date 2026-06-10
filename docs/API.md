@@ -33,7 +33,7 @@ Options:
 - `SideImageTransparency`: side image transparency.
 - `ToggleKey`: key that hides/shows the UI.
 - `ConfigFolder`: folder used by `SaveConfig` when file APIs exist.
-- `Font`: font enum or enum name string.
+- `Font`: font enum, enum name string, Roblox font family name, or custom font asset ID.
 
 Font names:
 
@@ -41,9 +41,18 @@ Font names:
 Window:SetFont("FingerPaint")
 Window:SetFont("PatrickHand")
 Window:SetFont("rbxasset://fonts/families/FingerPaint.json")
+Window:SetFont("rbxassetid://123456789")
 ```
 
-CursedPaint tries `FontFace` first, then falls back to Roblox enum fonts if the client cannot load that family.
+CursedPaint tries `Font.fromName`, known font family paths, explicit `FontFace` values, and then Roblox enum fonts. If FingerPaint still renders as a normal font, your Roblox client or executor does not expose that family; upload/import a font and use its `rbxassetid://...` value.
+
+Font status:
+
+```lua
+local status = CursedPaint:GetFontStatus()
+print(status.Requested, status.Resolved, status.Method, status.Value)
+print(CursedPaint:GetFontHelp())
+```
 
 Aliases:
 
@@ -58,6 +67,7 @@ Window:CreateTab("Main")
 ```lua
 Window:SetTheme("JJS")
 Window:SetFont("Cartoon")
+Window:SetFont("rbxassetid://123456789")
 Window:SetMotion(true, 1.25)
 Window:SetVisible(true)
 Window:SetMinimized(false)

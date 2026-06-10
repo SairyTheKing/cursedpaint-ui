@@ -25,8 +25,11 @@ for _ in pairs(library.Themes) do
 end
 assert(themeCount == 1, "Only the JJS theme should ship")
 assert(library.Themes.JJS.StrokeThickness >= 3, "JJS outline should be thick")
-assert(library.Version == "0.7.0", "Version should be 0.7.0")
+assert(library.Version == "0.7.1", "Version should be 0.7.1")
 assert(library.Font == "FingerPaint", "Default font should be FingerPaint")
+assert(type(library.GetFontStatus) == "function", "GetFontStatus is missing")
+assert(type(library.GetFontHelp) == "function", "GetFontHelp is missing")
+assert(library:GetFontStatus().Requested == "FingerPaint", "Font status should start on FingerPaint")
 assert(type(library.SetMotion) == "function", "SetMotion is missing")
 
 local loader = fs.readFile("loader.lua")
