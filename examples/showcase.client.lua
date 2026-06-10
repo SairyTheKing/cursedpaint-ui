@@ -2,10 +2,14 @@
 -- Paste into a LocalScript, or run through your testing environment.
 
 local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/Source.lua"))()
+local PlaceholderImage = CursedPaint.PlaceholderImage
 
 local Window = CursedPaint:CreateWindow({
+	Title = "CursedPaint",
 	Theme = "Paper",
 	Size = UDim2.fromOffset(650, 370),
+	SideImage = PlaceholderImage,
+	SideImageTransparency = 0.78,
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
@@ -18,14 +22,21 @@ local Daily = Window:AddTab("Daily")
 Window:AddTab("-")
 
 Main:AddSection("CursedPaint UI")
+Main:AddBanner({
+	Title = "Paper Menu Library",
+	Caption = "Replace this image with any Roblox asset id.",
+	Image = PlaceholderImage,
+	ImageTransparency = 0.18,
+})
 Main:AddParagraph({
 	Title = "Testing Library",
-	Content = "This is a real control library with a flat paper menu style, FingerPaint text, sketch borders, tabs, callbacks, flags, config, and notifications.",
+	Content = "A real control library with a flat paper menu style, FingerPaint text, image rows, tabs, callbacks, flags, config, and notifications.",
 })
 Main:AddButton({
 	Title = "Notification",
 	Description = "Shows a paper-style popup.",
 	ButtonText = "SHOW",
+	Icon = PlaceholderImage,
 	Callback = function()
 		Window:Notify({
 			Title = "CursedPaint",
@@ -47,6 +58,7 @@ Controls:AddToggle({
 	Description = "Boolean flag example.",
 	Flag = "auto_sprint",
 	Default = true,
+	Icon = PlaceholderImage,
 	Callback = function(value)
 		Status:Set("Auto Sprint: " .. tostring(value))
 	end,
@@ -126,6 +138,13 @@ Combat:AddButton({
 })
 
 Visuals:AddSection("Visuals")
+Visuals:AddImage({
+	Title = "Image Row",
+	Caption = "Use AddImage or AddBanner for big art blocks.",
+	Image = PlaceholderImage,
+	Height = 120,
+	ImageTransparency = 0.08,
+})
 Visuals:AddColorPicker({
 	Title = "Bar Color",
 	Flag = "bar_color",
@@ -141,6 +160,15 @@ Visuals:AddDropdown({
 	Default = "Paper",
 	Callback = function(theme)
 		Window:SetTheme(theme)
+	end,
+})
+Visuals:AddButton({
+	Title = "Set Side Image",
+	Description = "Changes the faded image on the right side.",
+	ButtonText = "SET",
+	Callback = function()
+		Window:SetSideImage(PlaceholderImage, 0.6)
+		Status:Set("Side image changed.")
 	end,
 })
 Visuals:AddKeybind({
@@ -183,16 +211,22 @@ Daily:AddQuest({
 	Title = "Roll 15 times",
 	Value = 0,
 	Max = 15,
+	Image = PlaceholderImage,
+	ImageTransparency = 0.72,
 })
 Daily:AddQuest({
 	Title = "Use Special 15 times",
 	Value = 3,
 	Max = 15,
+	Image = PlaceholderImage,
+	ImageTransparency = 0.78,
 })
 Daily:AddQuest({
 	Title = "Play for 15 minutes",
 	Value = 8,
 	Max = 15,
+	Image = PlaceholderImage,
+	ImageTransparency = 0.82,
 })
 Daily:AddLabel("Refreshes in: 7h 29m 23s")
 Daily:AddProgress({

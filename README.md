@@ -20,12 +20,19 @@ local CursedPaint = require(path.to.Source)
 
 ```lua
 local Window = CursedPaint:CreateWindow({
+	Title = "CursedPaint",
 	Theme = "Paper",
 	Size = UDim2.fromOffset(650, 370),
+	SideImage = CursedPaint.PlaceholderImage,
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
 local Main = Window:AddTab("Main")
+
+Main:AddBanner({
+	Title = "Paper Menu Library",
+	Image = CursedPaint.PlaceholderImage,
+})
 
 Main:AddToggle({
 	Title = "Auto Sprint",
@@ -50,6 +57,8 @@ Full example: [showcase.client.lua](examples/showcase.client.lua)
 - FingerPaint-style text with fallback font.
 - Translucent paper board layout.
 - Left-side vertical tabs.
+- Optional background and side images.
+- Image rows, banners, quest art, and small row icons.
 - Draggable window.
 - Minimize, close, and toggle key.
 - Quest rows with counters and bars.
@@ -63,6 +72,8 @@ Controls:
 - `Section`
 - `Label`
 - `Paragraph`
+- `Image`
+- `Banner`
 - `Quest`
 - `Progress`
 - `Button`

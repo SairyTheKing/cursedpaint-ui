@@ -3,7 +3,8 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.3.0"
+CursedPaint.Version = "0.4.0"
+CursedPaint.PlaceholderImage = "rbxasset://textures/ui/GuiImagePlaceholder.png"
 
 CursedPaint.Themes = {
 	Paper = {
@@ -356,6 +357,39 @@ local function updateStroke(parent, theme)
 	end
 end
 
+local function normalizeImage(image)
+	if image == nil or image == "" then
+		return nil
+	end
+
+	if type(image) == "number" then
+		return "rbxassetid://" .. tostring(image)
+	end
+
+	local text = tostring(image)
+	if text:match("^%d+$") then
+		return "rbxassetid://" .. text
+	end
+
+	return text
+end
+
+local function imageLabel(parent, image, props)
+	local normalized = normalizeImage(image)
+	if not normalized then
+		return nil
+	end
+
+	props = props or {}
+	props.BackgroundTransparency = props.BackgroundTransparency == nil and 1 or props.BackgroundTransparency
+	props.BorderSizePixel = props.BorderSizePixel or 0
+	props.Image = normalized
+	props.Parent = parent
+
+	local label = make("ImageLabel", props)
+	return label
+end
+
 local function makeButton(parent, text, theme, width)
 	local button = make("TextButton", {
 		AutoButtonColor = false,
@@ -459,6 +493,14 @@ function CursedPaint:CreateWindow(options)
 	})
 	stroke(texture, theme, 1)
 
+	local backgroundImage = imageLabel(root, options.BackgroundImage, {
+		ImageTransparency = options.BackgroundImageTransparency or 0.72,
+		Position = UDim2.fromOffset(4, 4),
+		ScaleType = Enum.ScaleType.Crop,
+		Size = UDim2.new(1, -8, 1, -8),
+		ZIndex = 2,
+	})
+
 	local left = make("Frame", {
 		BackgroundColor3 = theme.Left,
 		BackgroundTransparency = 0.12,
@@ -470,14 +512,30 @@ function CursedPaint:CreateWindow(options)
 	})
 	stroke(left, theme, 1)
 
+	local titleLabel
+	local tabsTop = 6
+	if options.Title or options.Subtitle then
+		titleLabel = make("TextLabel", {
+			BackgroundTransparency = 1,
+			Text = tostring(options.Title or "CursedPaint"),
+			TextColor3 = theme.Text,
+			Position = UDim2.fromOffset(9, 5),
+			Size = UDim2.new(1, -18, 0, 28),
+			ZIndex = 5,
+			Parent = left,
+		})
+		setHandText(titleLabel, 21, Enum.TextXAlignment.Center)
+		tabsTop = 42
+	end
+
 	local tabs = make("ScrollingFrame", {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromOffset(0, 0),
-		Position = UDim2.fromOffset(6, 6),
+		Position = UDim2.fromOffset(6, tabsTop),
 		ScrollBarImageColor3 = theme.Ink,
 		ScrollBarThickness = 3,
-		Size = UDim2.new(1, -12, 1, -12),
+		Size = UDim2.new(1, -12, 1, -(tabsTop + 6)),
 		ZIndex = 4,
 		Parent = left,
 	})
@@ -492,6 +550,26 @@ function CursedPaint:CreateWindow(options)
 		ZIndex = 3,
 		Parent = root,
 	})
+
+	local sideImage = imageLabel(content, options.SideImage or options.PortraitImage, {
+		AnchorPoint = Vector2.new(1, 0),
+		ImageTransparency = options.SideImageTransparency or options.PortraitTransparency or 0.62,
+		Position = UDim2.new(1, -4, 0, 0),
+		ScaleType = Enum.ScaleType.Crop,
+		Size = UDim2.new(0, options.SideImageWidth or 155, 1, 0),
+		ZIndex = 3,
+	})
+
+	local bottomStrip = make("Frame", {
+		BackgroundColor3 = theme.Bar,
+		BackgroundTransparency = 0.64,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 8, 1, -18),
+		Size = UDim2.new(1, -16, 0, 10),
+		ZIndex = 2,
+		Parent = root,
+	})
+	stroke(bottomStrip, theme, 1)
 
 	local close = makeButton(root, "X", theme, 28)
 	close.Position = UDim2.new(1, -38, 0, 10)
@@ -514,9 +592,13 @@ function CursedPaint:CreateWindow(options)
 		ScreenGui = gui,
 		Root = root,
 		Texture = texture,
+		BackgroundImage = backgroundImage,
 		Left = left,
+		TitleLabel = titleLabel,
 		TabsBar = tabs,
 		Content = content,
+		SideImage = sideImage,
+		BottomStrip = bottomStrip,
 		ToastHolder = toastHolder,
 		ThemeName = themeName,
 		Theme = theme,
@@ -536,8 +618,15 @@ function CursedPaint:CreateWindow(options)
 		root.BackgroundColor3 = nextTheme.Backdrop
 		root.BackgroundTransparency = nextTheme.PanelTransparency
 		texture.BackgroundTransparency = 0.86
+		if backgroundImage then
+			backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.72
+		end
 		left.BackgroundColor3 = nextTheme.Left
+		if titleLabel then
+			titleLabel.TextColor3 = nextTheme.Text
+		end
 		tabs.ScrollBarImageColor3 = nextTheme.Ink
+		bottomStrip.BackgroundColor3 = nextTheme.Bar
 		close.BackgroundColor3 = nextTheme.Panel
 		close.BackgroundTransparency = nextTheme.RowTransparency
 		close.TextColor3 = nextTheme.Text
@@ -547,6 +636,7 @@ function CursedPaint:CreateWindow(options)
 		updateStroke(root, nextTheme)
 		updateStroke(texture, nextTheme)
 		updateStroke(left, nextTheme)
+		updateStroke(bottomStrip, nextTheme)
 		updateStroke(close, nextTheme)
 		updateStroke(minimize, nextTheme)
 	end)
@@ -594,6 +684,59 @@ function Window:SetTheme(name)
 	self.Flags.__theme = name
 	self:_applyTheme()
 	return true
+end
+
+function Window:SetBackgroundImage(image, transparency)
+	local normalized = normalizeImage(image)
+	if not normalized then
+		if self.BackgroundImage then
+			self.BackgroundImage:Destroy()
+			self.BackgroundImage = nil
+		end
+		return nil
+	end
+
+	if not self.BackgroundImage then
+		self.BackgroundImage = imageLabel(self.Root, normalized, {
+			ImageTransparency = transparency or 0.72,
+			Position = UDim2.fromOffset(4, 4),
+			ScaleType = Enum.ScaleType.Crop,
+			Size = UDim2.new(1, -8, 1, -8),
+			ZIndex = 2,
+		})
+	else
+		self.BackgroundImage.Image = normalized
+		self.BackgroundImage.ImageTransparency = transparency or self.BackgroundImage.ImageTransparency
+	end
+
+	return self.BackgroundImage
+end
+
+function Window:SetSideImage(image, transparency)
+	local normalized = normalizeImage(image)
+	if not normalized then
+		if self.SideImage then
+			self.SideImage:Destroy()
+			self.SideImage = nil
+		end
+		return nil
+	end
+
+	if not self.SideImage then
+		self.SideImage = imageLabel(self.Content, normalized, {
+			AnchorPoint = Vector2.new(1, 0),
+			ImageTransparency = transparency or 0.62,
+			Position = UDim2.new(1, -4, 0, 0),
+			ScaleType = Enum.ScaleType.Crop,
+			Size = UDim2.new(0, 155, 1, 0),
+			ZIndex = 3,
+		})
+	else
+		self.SideImage.Image = normalized
+		self.SideImage.ImageTransparency = transparency or self.SideImage.ImageTransparency
+	end
+
+	return self.SideImage
 end
 
 function Window:GetThemes()
@@ -885,6 +1028,7 @@ function Tab:_row(height)
 		BackgroundColor3 = theme.Panel,
 		BackgroundTransparency = theme.RowTransparency,
 		BorderSizePixel = 0,
+		ClipsDescendants = true,
 		Size = UDim2.new(1, 0, 0, height or 58),
 		Parent = self.Page,
 	})
@@ -1026,23 +1170,117 @@ function Tab:Paragraph(options)
 	}
 end
 
+function Tab:Image(options)
+	options = options or {}
+	local theme = self.Window.Theme
+	local height = options.Height or 132
+	local row = self:_row(height)
+
+	local image = imageLabel(row, options.Image or CursedPaint.PlaceholderImage, {
+		ImageColor3 = options.ImageColor3 or Color3.fromRGB(255, 255, 255),
+		ImageTransparency = options.ImageTransparency or 0,
+		Position = UDim2.fromOffset(0, 0),
+		ScaleType = options.ScaleType or Enum.ScaleType.Crop,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 2,
+	})
+
+	local shade = make("Frame", {
+		BackgroundColor3 = theme.Panel,
+		BackgroundTransparency = 0.28,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 0, 1, -44),
+		Size = UDim2.new(1, 0, 0, 44),
+		ZIndex = 3,
+		Parent = row,
+	})
+
+	local title
+	if options.Title then
+		title = make("TextLabel", {
+			BackgroundTransparency = 1,
+			Text = tostring(options.Title),
+			TextColor3 = theme.Text,
+			Position = UDim2.fromOffset(8, height - 42),
+			Size = UDim2.new(1, -16, 0, 24),
+			ZIndex = 4,
+			Parent = row,
+		})
+		setHandText(title, 20)
+	end
+
+	local caption
+	if options.Caption or options.Description then
+		caption = make("TextLabel", {
+			BackgroundTransparency = 1,
+			Font = bodyFont(),
+			Text = tostring(options.Caption or options.Description),
+			TextColor3 = theme.Muted,
+			TextSize = 12,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Position = UDim2.fromOffset(10, height - 19),
+			Size = UDim2.new(1, -20, 0, 16),
+			ZIndex = 4,
+			Parent = row,
+		})
+	end
+
+	self.Window:_bindTheme(function(nextTheme)
+		shade.BackgroundColor3 = nextTheme.Panel
+		if title then
+			title.TextColor3 = nextTheme.Text
+		end
+		if caption then
+			caption.TextColor3 = nextTheme.Muted
+		end
+	end)
+
+	return {
+		Set = function(_, nextImage)
+			if image then
+				image.Image = normalizeImage(nextImage) or CursedPaint.PlaceholderImage
+			end
+		end,
+		Instance = row,
+		Image = image,
+	}
+end
+
+function Tab:Banner(options)
+	options = options or {}
+	options.Height = options.Height or 96
+	return self:Image(options)
+end
+
 function Tab:Quest(options)
 	options = options or {}
 	local theme = self.Window.Theme
 	local maxValue = tonumber(options.Max) or 1
 	local value = clampNumber(options.Value or 0, 0, maxValue)
 	local row = self:_row(options.Height or 82)
-	local title = rowTitle(row, options.Title or "Quest", theme, 2, 16)
+	local art = imageLabel(row, options.Image or options.Portrait, {
+		AnchorPoint = Vector2.new(1, 0),
+		ImageTransparency = options.ImageTransparency or 0.55,
+		Position = UDim2.new(1, -2, 0, 2),
+		ScaleType = Enum.ScaleType.Crop,
+		Size = UDim2.fromOffset(options.ImageWidth or 150, (options.Height or 82) - 4),
+		ZIndex = 2,
+	})
+	local title = rowTitle(row, options.Title or "Quest", theme, 2, art and 168 or 16)
+	title.ZIndex = 4
 	local counter = make("TextLabel", {
 		BackgroundTransparency = 1,
 		Text = tostring(value) .. "/" .. tostring(maxValue),
 		TextColor3 = theme.Text,
 		Position = UDim2.fromOffset(8, 33),
-		Size = UDim2.new(1, -16, 0, 24),
+		Size = UDim2.new(1, art and -176 or -16, 0, 24),
+		ZIndex = 4,
 		Parent = row,
 	})
 	setHandText(counter, 22)
 	local track, fill = createProgressBar(row, theme, 60)
+	track.ZIndex = 5
+	fill.ZIndex = 6
 
 	local function set(nextValue, nextMax)
 		if nextMax then
@@ -1060,6 +1298,9 @@ function Tab:Quest(options)
 		counter.TextColor3 = nextTheme.Text
 		track.BackgroundColor3 = nextTheme.Bar
 		fill.BackgroundColor3 = nextTheme.BarFill
+		if art then
+			art.ImageTransparency = options.ImageTransparency or 0.55
+		end
 		updateStroke(track, nextTheme)
 	end)
 
@@ -1117,6 +1358,17 @@ function Tab:Button(options)
 	local theme = self.Window.Theme
 	local row = self:_row(56)
 	local title = rowTitle(row, options.Title or "Button", theme, 2, 128)
+	local icon = imageLabel(row, options.Icon, {
+		ImageTransparency = options.IconTransparency or 0,
+		Position = UDim2.fromOffset(8, 10),
+		ScaleType = Enum.ScaleType.Fit,
+		Size = UDim2.fromOffset(34, 34),
+		ZIndex = 4,
+	})
+	if icon then
+		title.Position = UDim2.fromOffset(48, 2)
+		title.Size = UDim2.new(1, -168, 0, 28)
+	end
 	local desc
 	if options.Description then
 		desc = make("TextLabel", {
@@ -1126,8 +1378,8 @@ function Tab:Button(options)
 			TextColor3 = theme.Muted,
 			TextSize = 12,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.fromOffset(9, 32),
-			Size = UDim2.new(1, -140, 0, 18),
+			Position = UDim2.fromOffset(icon and 49 or 9, 32),
+			Size = UDim2.new(1, icon and -180 or -140, 0, 18),
 			Parent = row,
 		})
 	end
@@ -1167,6 +1419,17 @@ function Tab:Toggle(options)
 	local value = options.Default == true
 	local row = self:_row(56)
 	local title = rowTitle(row, options.Title or "Toggle", theme, 2, 128)
+	local icon = imageLabel(row, options.Icon, {
+		ImageTransparency = options.IconTransparency or 0,
+		Position = UDim2.fromOffset(8, 10),
+		ScaleType = Enum.ScaleType.Fit,
+		Size = UDim2.fromOffset(34, 34),
+		ZIndex = 4,
+	})
+	if icon then
+		title.Position = UDim2.fromOffset(48, 2)
+		title.Size = UDim2.new(1, -168, 0, 28)
+	end
 	local desc
 	if options.Description then
 		desc = make("TextLabel", {
@@ -1176,8 +1439,8 @@ function Tab:Toggle(options)
 			TextColor3 = theme.Muted,
 			TextSize = 12,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.fromOffset(9, 32),
-			Size = UDim2.new(1, -140, 0, 18),
+			Position = UDim2.fromOffset(icon and 49 or 9, 32),
+			Size = UDim2.new(1, icon and -180 or -140, 0, 18),
 			Parent = row,
 		})
 	end
@@ -1858,6 +2121,8 @@ Window.Tab = Window.CreateTab
 Tab.AddSection = Tab.Section
 Tab.AddLabel = Tab.Label
 Tab.AddParagraph = Tab.Paragraph
+Tab.AddImage = Tab.Image
+Tab.AddBanner = Tab.Banner
 Tab.AddQuest = Tab.Quest
 Tab.AddProgress = Tab.Progress
 Tab.AddButton = Tab.Button

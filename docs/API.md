@@ -4,9 +4,12 @@
 
 ```lua
 local Window = CursedPaint:CreateWindow({
+	Title = "CursedPaint",
 	Theme = "Paper",
 	Size = UDim2.fromOffset(650, 370),
 	Position = UDim2.fromScale(0.5, 0.5),
+	BackgroundImage = nil,
+	SideImage = CursedPaint.PlaceholderImage,
 	ToggleKey = Enum.KeyCode.RightControl,
 	ConfigFolder = "CursedPaintUI",
 })
@@ -17,8 +20,20 @@ Options:
 - `Theme`: theme name.
 - `Size`: board size.
 - `Position`: board position.
+- `Title`: optional left-menu title.
+- `BackgroundImage`: optional full-board image.
+- `SideImage`: optional faded image on the content side.
+- `BackgroundImageTransparency`: image transparency.
+- `SideImageTransparency`: side image transparency.
 - `ToggleKey`: key that hides/shows the UI.
 - `ConfigFolder`: folder used by `SaveConfig` when file APIs exist.
+
+Change images later:
+
+```lua
+Window:SetBackgroundImage("rbxassetid://123456", 0.7)
+Window:SetSideImage("rbxassetid://123456", 0.6)
+```
 
 ## Tabs
 
@@ -53,6 +68,27 @@ Daily:Paragraph({
 })
 ```
 
+## Image
+
+```lua
+Daily:Image({
+	Title = "Image Row",
+	Caption = "Use any Roblox image asset.",
+	Image = "rbxassetid://123456",
+	Height = 120,
+	ImageTransparency = 0.1,
+})
+```
+
+## Banner
+
+```lua
+Daily:Banner({
+	Title = "Banner",
+	Image = CursedPaint.PlaceholderImage,
+})
+```
+
 ## Quest
 
 ```lua
@@ -60,6 +96,8 @@ local Quest = Daily:Quest({
 	Title = "Roll 15 times",
 	Value = 0,
 	Max = 15,
+	Image = "rbxassetid://123456",
+	ImageTransparency = 0.7,
 })
 
 Quest:Set(8, 15)
@@ -89,6 +127,7 @@ Total:Set(75)
 Daily:Button({
 	Title = "Claim Reward",
 	ButtonText = "CLAIM",
+	Icon = "rbxassetid://123456",
 	Callback = function()
 		print("clicked")
 	end,
@@ -272,6 +311,8 @@ Window:Destroy()
 Every control also has an `Add...` alias:
 
 ```lua
+Tab:AddImage(...)
+Tab:AddBanner(...)
 Tab:AddButton(...)
 Tab:AddToggle(...)
 Tab:AddSlider(...)
