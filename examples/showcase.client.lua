@@ -4,157 +4,222 @@
 local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/Source.lua"))()
 
 local Window = CursedPaint:CreateWindow({
-	Title = "CursedPaint UI",
-	Subtitle = "finger paint test panel",
-	Theme = "Cursed",
+	Theme = "Paper",
+	Size = UDim2.fromOffset(650, 370),
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
-local Start = Window:CreateTab("Start", "*")
-local Fun = Window:CreateTab("Silly", "!")
-local Config = Window:CreateTab("Config", "#")
+local Daily = Window:CreateTab("Daily")
+local Weekly = Window:CreateTab("Weekly")
+local Stats = Window:CreateTab("Stats")
+local Gamemodes = Window:CreateTab("Gamemodes")
+local General = Window:CreateTab("General")
+local Honored = Window:CreateTab("Honored One")
+local Vessel = Window:CreateTab("Vessel")
+local Gambler = Window:CreateTab("Restless Gambler")
+local Shadows = Window:CreateTab("Ten Shadows")
+local Perfection = Window:CreateTab("Perfection")
+local Blood = Window:CreateTab("Blood Manipulator")
+local Switcher = Window:CreateTab("Switcher")
+Window:CreateTab("-")
 
-Start:Section("Showcase")
-
-Start:Paragraph({
-	Title = "What is this?",
-	Content = "A hand-painted Roblox UI library with tabs, themes, controls, config, and goofy motion.",
+Daily:Quest({
+	Title = "Roll 15 times",
+	Value = 0,
+	Max = 15,
 })
 
-Start:Button({
-	Title = "Bonk Button",
-	Description = "Runs a callback and sends a notification.",
-	ButtonText = "BONK",
+Daily:Quest({
+	Title = "Use Special 15 times",
+	Value = 0,
+	Max = 15,
+})
+
+Daily:Quest({
+	Title = "Play for 15 minutes",
+	Value = 0,
+	Max = 15,
+})
+
+Daily:Label("Refreshes in: 7h 29m 23s")
+Daily:Progress({
+	Title = "Total Progress",
+	Value = 50,
+	Max = 100,
+})
+
+Weekly:Section("Weekly")
+Weekly:Quest({
+	Title = "Win 10 rounds",
+	Value = 3,
+	Max = 10,
+})
+Weekly:Quest({
+	Title = "Deal 5000 damage",
+	Value = 2400,
+	Max = 5000,
+})
+Weekly:Progress({
+	Title = "Total Progress",
+	Value = 38,
+	Max = 100,
+})
+
+Stats:Section("Stats")
+Stats:Label("Kills: 128")
+Stats:Label("Wins: 17")
+Stats:Label("Favorite mode: Silly")
+
+Gamemodes:Section("Gamemodes")
+Gamemodes:Button({
+	Title = "Casual",
+	ButtonText = "PLAY",
 	Callback = function()
 		Window:Notify({
-			Title = "Bonk",
-			Content = "The silly button has been pressed.",
-			Duration = 2.5,
+			Title = "Gamemodes",
+			Content = "Casual selected.",
+		})
+	end,
+})
+Gamemodes:Button({
+	Title = "Ranked",
+	ButtonText = "PLAY",
+	Callback = function()
+		Window:Notify({
+			Title = "Gamemodes",
+			Content = "Ranked selected.",
 		})
 	end,
 })
 
-Start:Toggle({
-	Title = "Silly Mode",
-	Description = "Stores a boolean flag.",
-	Flag = "silly_mode",
+General:Section("General")
+General:Toggle({
+	Title = "Auto Sprint",
+	Flag = "auto_sprint",
 	Default = true,
-	Callback = function(value)
-		print("Silly Mode:", value)
-	end,
 })
-
-Start:Slider({
-	Title = "Doodle Power",
-	Description = "A rounded stepped slider.",
-	Flag = "doodle_power",
+General:Slider({
+	Title = "Volume",
+	Flag = "volume",
 	Min = 0,
 	Max = 100,
 	Step = 5,
-	Default = 35,
-	Callback = function(value)
-		print("Doodle Power:", value)
+	Default = 50,
+})
+General:Dropdown({
+	Title = "Menu Theme",
+	Flag = "menu_theme",
+	Options = { "Paper", "Smoke", "Blood", "Void", "Forest", "Candy" },
+	Default = "Paper",
+	Callback = function(theme)
+		Window:SetTheme(theme)
 	end,
 })
 
-Start:Dropdown({
-	Title = "Move Style",
-	Description = "Pick one option.",
-	Flag = "move_style",
-	Options = { "Calm", "Silly", "Cursed", "Sweaty" },
-	Default = "Silly",
-	Callback = function(value)
-		print("Move Style:", value)
-	end,
+Honored:Section("Honored One")
+Honored:Quest({
+	Title = "Land Blue 5 times",
+	Value = 1,
+	Max = 5,
+})
+Honored:Quest({
+	Title = "Hit a reversal",
+	Value = 0,
+	Max = 1,
 })
 
-Fun:Section("Inputs")
-
-Fun:Textbox({
-	Title = "Shout Text",
-	Description = "Press enter to submit.",
-	Flag = "shout_text",
-	Placeholder = "domain expansion...",
-	Default = "paint time",
-	Callback = function(text)
-		Window:Notify({
-			Title = "Textbox",
-			Content = "You typed: " .. text,
-		})
-	end,
+Vessel:Section("Vessel")
+Vessel:Toggle({
+	Title = "Show Move Tips",
+	Flag = "vessel_tips",
+	Default = false,
 })
-
-Fun:Keybind({
-	Title = "Panic Key",
-	Description = "Click the key button, then press a key.",
-	Flag = "panic_key",
-	Default = Enum.KeyCode.K,
-	Pressed = function(key)
-		Window:Notify({
-			Title = "Keybind",
-			Content = key.Name .. " was pressed.",
-		})
-	end,
-})
-
-Fun:ColorPicker({
-	Title = "Aura Color",
-	Description = "Six quick swatches.",
-	Flag = "aura_color",
-	Default = Color3.fromRGB(255, 82, 92),
-	Callback = function(color)
-		print("Aura Color:", color)
-	end,
-})
-
-local Cooldown = Fun:Progress({
-	Title = "Fake Cooldown",
-	Description = "You can update this from your own code.",
-	Value = 42,
+Vessel:Slider({
+	Title = "Rage",
+	Flag = "rage",
+	Min = 0,
 	Max = 100,
+	Step = 1,
+	Default = 25,
 })
 
-Fun:Button({
-	Title = "Random Cooldown",
+Gambler:Section("Restless Gambler")
+Gambler:Button({
+	Title = "Spin Luck",
 	ButtonText = "ROLL",
 	Callback = function()
-		Cooldown:Set(math.random(0, 100))
+		Window:Notify({
+			Title = "Jackpot",
+			Content = "You rolled " .. tostring(math.random(1, 777)) .. ".",
+		})
 	end,
 })
 
-Config:Section("Looks")
-Config:ThemeDropdown("Theme")
+Shadows:Section("Ten Shadows")
+Shadows:ColorPicker({
+	Title = "Shadow Color",
+	Flag = "shadow_color",
+	Default = Color3.fromRGB(21, 205, 244),
+})
 
-Config:Button({
+Perfection:Section("Perfection")
+Perfection:Textbox({
+	Title = "Shout",
+	Flag = "shout",
+	Placeholder = "type something",
+	Default = "idle transfiguration",
+	Callback = function(text)
+		Window:Notify({
+			Title = "Shout",
+			Content = text,
+		})
+	end,
+})
+
+Blood:Section("Blood Manipulator")
+Blood:Slider({
+	Title = "Blood Flow",
+	Flag = "blood_flow",
+	Min = 0,
+	Max = 100,
+	Step = 10,
+	Default = 70,
+})
+
+Switcher:Section("Switcher")
+Switcher:Keybind({
+	Title = "Toggle UI",
+	Flag = "toggle_ui",
+	Default = Enum.KeyCode.RightControl,
+	Pressed = function()
+		Window:SetVisible(false)
+	end,
+})
+Switcher:Button({
 	Title = "Save Config",
-	Description = "Uses writefile when available, memory fallback otherwise.",
 	ButtonText = "SAVE",
 	Callback = function()
 		local saved = Window:SaveConfig("showcase")
 		Window:Notify({
 			Title = "Config",
-			Content = saved and "Saved to file." or "Saved in memory for this session.",
+			Content = saved and "Saved to file." or "Saved in memory.",
 		})
 	end,
 })
-
-Config:Button({
+Switcher:Button({
 	Title = "Load Config",
-	Description = "Restores flags and theme.",
 	ButtonText = "LOAD",
 	Callback = function()
 		local ok, message = Window:LoadConfig("showcase")
 		Window:Notify({
 			Title = "Config",
-			Content = ok and "Loaded showcase config." or tostring(message),
+			Content = ok and "Loaded config." or tostring(message),
 		})
 	end,
 })
 
-Config:Label("Tip: RightControl toggles the whole UI.")
-
 Window:Notify({
-	Title = "CursedPaint loaded",
-	Content = "Open the tabs and mess with the controls.",
+	Title = "CursedPaint",
+	Content = "Quest-style showcase loaded.",
 	Duration = 3,
 })

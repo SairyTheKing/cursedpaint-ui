@@ -1,29 +1,26 @@
 # Themes
 
-CursedPaint ships with eight themes:
+CursedPaint ships with six paper-menu themes:
 
-- `Cursed`
-- `Gojo`
-- `Sukuna`
-- `Megumi`
-- `Nobara`
-- `Manga`
-- `Candy`
+- `Paper`
+- `Smoke`
+- `Blood`
 - `Void`
+- `Forest`
+- `Candy`
 
 Set a theme when creating the window:
 
 ```lua
 local Window = CursedPaint:CreateWindow({
-	Title = "Testing UI",
-	Theme = "Cursed",
+	Theme = "Paper",
 })
 ```
 
 Change it later:
 
 ```lua
-Window:SetTheme("Manga")
+Window:SetTheme("Blood")
 ```
 
 Add a theme dropdown:
@@ -39,17 +36,21 @@ Add a new theme before creating your window:
 
 ```lua
 CursedPaint.Themes.MyTheme = {
-	Background = Color3.fromRGB(18, 18, 22),
-	Panel = Color3.fromRGB(31, 31, 38),
-	PanelAlt = Color3.fromRGB(44, 44, 54),
-	Ink = Color3.fromRGB(245, 240, 230),
-	Muted = Color3.fromRGB(170, 160, 150),
-	Accent = Color3.fromRGB(255, 90, 110),
-	AccentAlt = Color3.fromRGB(255, 205, 95),
-	Good = Color3.fromRGB(100, 220, 135),
-	Bad = Color3.fromRGB(255, 90, 90),
-	Stroke = Color3.fromRGB(8, 8, 10),
-	Shadow = Color3.fromRGB(0, 0, 0),
+	Backdrop = Color3.fromRGB(226, 224, 215),
+	Left = Color3.fromRGB(238, 235, 204),
+	Panel = Color3.fromRGB(245, 244, 238),
+	PanelAlt = Color3.fromRGB(223, 221, 214),
+	Text = Color3.fromRGB(18, 18, 18),
+	Muted = Color3.fromRGB(60, 60, 60),
+	Ink = Color3.fromRGB(0, 0, 0),
+	SelectedTop = Color3.fromRGB(255, 246, 158),
+	SelectedBottom = Color3.fromRGB(214, 98, 62),
+	Bar = Color3.fromRGB(103, 103, 99),
+	BarFill = Color3.fromRGB(21, 205, 244),
+	Good = Color3.fromRGB(61, 183, 100),
+	Bad = Color3.fromRGB(215, 65, 65),
+	PanelTransparency = 0.24,
+	RowTransparency = 0.12,
 }
 
 local Window = CursedPaint:CreateWindow({
@@ -59,14 +60,18 @@ local Window = CursedPaint:CreateWindow({
 
 ## Color Keys
 
-- `Background`: main window background.
-- `Panel`: normal cards and header.
-- `PanelAlt`: inputs, tracks, secondary cards.
-- `Ink`: primary text.
-- `Muted`: secondary text.
-- `Accent`: buttons, active tabs, section bars.
-- `AccentAlt`: slider/progress highlights and extra emphasis.
-- `Good`: enabled toggles.
-- `Bad`: error/negative color.
-- `Stroke`: chunky border color.
-- `Shadow`: window shadow color.
+- `Backdrop`: outer board color.
+- `Left`: left tab menu color.
+- `Panel`: quest/control row color.
+- `PanelAlt`: input/secondary color.
+- `Text`: main text color.
+- `Muted`: small helper text color.
+- `Ink`: black sketch border color.
+- `SelectedTop`: selected tab gradient top.
+- `SelectedBottom`: selected tab gradient bottom.
+- `Bar`: progress track color.
+- `BarFill`: progress fill color.
+- `Good`: enabled state color.
+- `Bad`: negative/error color.
+- `PanelTransparency`: outer board transparency.
+- `RowTransparency`: control row transparency.

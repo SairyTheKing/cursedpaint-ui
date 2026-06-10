@@ -1,8 +1,8 @@
 # CursedPaint UI
 
-CursedPaint UI is a Roblox Luau UI library for testing panels, showcases, and small script tools.
+CursedPaint UI is a Roblox Luau UI library for testing panels, quest menus, and showcase scripts.
 
-It uses a goofy hand-painted style with `Enum.Font.FingerPaint`, chunky borders, dark panels, loud accents, and theme swapping. It is inspired by silly fighting-game UI energy, but it is an original library.
+The default style is a flat translucent paper menu with black sketch borders, left-side text tabs, FingerPaint text, and cyan progress bars. It is made to feel closer to a goofy Roblox fighting-game menu while staying original and asset-free.
 
 ## Load
 
@@ -20,23 +20,23 @@ local CursedPaint = require(path.to.Source)
 
 ```lua
 local Window = CursedPaint:CreateWindow({
-	Title = "Testing UI",
-	Subtitle = "finger paint mode",
-	Theme = "Cursed",
+	Theme = "Paper",
+	Size = UDim2.fromOffset(650, 370),
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
-local Tab = Window:CreateTab("Start", "*")
+local Daily = Window:CreateTab("Daily")
 
-Tab:Button({
-	Title = "Bonk",
-	ButtonText = "DO IT",
-	Callback = function()
-		Window:Notify({
-			Title = "Bonk",
-			Content = "Button pressed.",
-		})
-	end,
+Daily:Quest({
+	Title = "Roll 15 times",
+	Value = 0,
+	Max = 15,
+})
+
+Daily:Progress({
+	Title = "Total Progress",
+	Value = 50,
+	Max = 100,
 })
 ```
 
@@ -44,26 +44,31 @@ Full example: [showcase.client.lua](examples/showcase.client.lua)
 
 ## Features
 
-- FingerPaint-style title/control text with fallback font.
+- FingerPaint-style text with fallback font.
+- Translucent paper board layout.
+- Left-side vertical tabs.
 - Draggable window.
 - Minimize, close, and toggle key.
-- Tabs.
+- Quest rows with counters and bars.
 - Notifications.
 - Config save/load with `writefile` when available and memory fallback otherwise.
-- Themes: `Cursed`, `Gojo`, `Sukuna`, `Megumi`, `Nobara`, `Manga`, `Candy`, `Void`.
-- Controls:
-  - `Section`
-  - `Label`
-  - `Paragraph`
-  - `Button`
-  - `Toggle`
-  - `Slider`
-  - `Dropdown`
-  - `Textbox`
-  - `Keybind`
-  - `ColorPicker`
-  - `Progress`
-  - `ThemeDropdown`
+- Themes: `Paper`, `Smoke`, `Blood`, `Void`, `Forest`, `Candy`.
+
+Controls:
+
+- `Section`
+- `Label`
+- `Paragraph`
+- `Quest`
+- `Progress`
+- `Button`
+- `Toggle`
+- `Slider`
+- `Dropdown`
+- `Textbox`
+- `Keybind`
+- `ColorPicker`
+- `ThemeDropdown`
 
 ## Config
 

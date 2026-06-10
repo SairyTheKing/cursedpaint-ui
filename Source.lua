@@ -1,114 +1,112 @@
 -- CursedPaint UI
--- A silly hand-painted Roblox Luau UI library for testing scripts and showcases.
+-- Flat FingerPaint Roblox UI library with a translucent paper/menu style.
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.1.0"
+CursedPaint.Version = "0.2.0"
 
 CursedPaint.Themes = {
-	Cursed = {
-		Background = Color3.fromRGB(23, 20, 25),
-		Panel = Color3.fromRGB(35, 31, 39),
-		PanelAlt = Color3.fromRGB(46, 39, 51),
-		Ink = Color3.fromRGB(245, 235, 216),
-		Muted = Color3.fromRGB(188, 176, 159),
-		Accent = Color3.fromRGB(219, 46, 66),
-		AccentAlt = Color3.fromRGB(255, 188, 66),
-		Good = Color3.fromRGB(101, 211, 122),
-		Bad = Color3.fromRGB(255, 95, 95),
-		Stroke = Color3.fromRGB(9, 8, 11),
-		Shadow = Color3.fromRGB(7, 6, 8),
+	Paper = {
+		Backdrop = Color3.fromRGB(226, 224, 215),
+		Left = Color3.fromRGB(238, 235, 204),
+		Panel = Color3.fromRGB(245, 244, 238),
+		PanelAlt = Color3.fromRGB(223, 221, 214),
+		Text = Color3.fromRGB(18, 18, 18),
+		Muted = Color3.fromRGB(60, 60, 60),
+		Ink = Color3.fromRGB(0, 0, 0),
+		SelectedTop = Color3.fromRGB(255, 246, 158),
+		SelectedBottom = Color3.fromRGB(214, 98, 62),
+		Bar = Color3.fromRGB(103, 103, 99),
+		BarFill = Color3.fromRGB(21, 205, 244),
+		Good = Color3.fromRGB(61, 183, 100),
+		Bad = Color3.fromRGB(215, 65, 65),
+		PanelTransparency = 0.24,
+		RowTransparency = 0.12,
 	},
-	Gojo = {
-		Background = Color3.fromRGB(14, 18, 28),
-		Panel = Color3.fromRGB(25, 31, 46),
-		PanelAlt = Color3.fromRGB(33, 43, 65),
-		Ink = Color3.fromRGB(235, 245, 255),
-		Muted = Color3.fromRGB(163, 184, 212),
-		Accent = Color3.fromRGB(87, 149, 255),
-		AccentAlt = Color3.fromRGB(190, 232, 255),
-		Good = Color3.fromRGB(92, 221, 192),
-		Bad = Color3.fromRGB(255, 102, 122),
-		Stroke = Color3.fromRGB(6, 9, 16),
-		Shadow = Color3.fromRGB(4, 6, 10),
+	Smoke = {
+		Backdrop = Color3.fromRGB(196, 196, 190),
+		Left = Color3.fromRGB(221, 218, 198),
+		Panel = Color3.fromRGB(244, 244, 240),
+		PanelAlt = Color3.fromRGB(205, 205, 200),
+		Text = Color3.fromRGB(12, 12, 12),
+		Muted = Color3.fromRGB(67, 67, 67),
+		Ink = Color3.fromRGB(0, 0, 0),
+		SelectedTop = Color3.fromRGB(255, 255, 215),
+		SelectedBottom = Color3.fromRGB(145, 145, 145),
+		Bar = Color3.fromRGB(82, 82, 82),
+		BarFill = Color3.fromRGB(50, 215, 255),
+		Good = Color3.fromRGB(67, 171, 94),
+		Bad = Color3.fromRGB(201, 67, 67),
+		PanelTransparency = 0.18,
+		RowTransparency = 0.08,
 	},
-	Sukuna = {
-		Background = Color3.fromRGB(29, 13, 16),
-		Panel = Color3.fromRGB(45, 22, 26),
-		PanelAlt = Color3.fromRGB(62, 30, 36),
-		Ink = Color3.fromRGB(255, 228, 219),
-		Muted = Color3.fromRGB(217, 160, 146),
-		Accent = Color3.fromRGB(255, 58, 76),
-		AccentAlt = Color3.fromRGB(255, 129, 82),
-		Good = Color3.fromRGB(112, 218, 126),
-		Bad = Color3.fromRGB(255, 77, 77),
-		Stroke = Color3.fromRGB(13, 5, 7),
-		Shadow = Color3.fromRGB(9, 4, 5),
-	},
-	Megumi = {
-		Background = Color3.fromRGB(14, 25, 24),
-		Panel = Color3.fromRGB(24, 42, 39),
-		PanelAlt = Color3.fromRGB(32, 58, 53),
-		Ink = Color3.fromRGB(226, 246, 237),
-		Muted = Color3.fromRGB(154, 196, 181),
-		Accent = Color3.fromRGB(68, 193, 157),
-		AccentAlt = Color3.fromRGB(168, 221, 116),
-		Good = Color3.fromRGB(112, 227, 141),
-		Bad = Color3.fromRGB(255, 104, 104),
-		Stroke = Color3.fromRGB(5, 12, 11),
-		Shadow = Color3.fromRGB(4, 8, 8),
-	},
-	Nobara = {
-		Background = Color3.fromRGB(35, 19, 25),
-		Panel = Color3.fromRGB(52, 30, 39),
-		PanelAlt = Color3.fromRGB(70, 41, 53),
-		Ink = Color3.fromRGB(255, 235, 235),
-		Muted = Color3.fromRGB(219, 163, 175),
-		Accent = Color3.fromRGB(238, 86, 124),
-		AccentAlt = Color3.fromRGB(255, 204, 87),
-		Good = Color3.fromRGB(102, 219, 130),
-		Bad = Color3.fromRGB(255, 82, 103),
-		Stroke = Color3.fromRGB(14, 6, 9),
-		Shadow = Color3.fromRGB(10, 4, 7),
-	},
-	Manga = {
-		Background = Color3.fromRGB(238, 232, 218),
-		Panel = Color3.fromRGB(255, 250, 235),
-		PanelAlt = Color3.fromRGB(235, 226, 207),
-		Ink = Color3.fromRGB(31, 28, 25),
-		Muted = Color3.fromRGB(100, 93, 83),
-		Accent = Color3.fromRGB(38, 37, 35),
-		AccentAlt = Color3.fromRGB(210, 67, 67),
-		Good = Color3.fromRGB(58, 153, 84),
-		Bad = Color3.fromRGB(204, 63, 63),
-		Stroke = Color3.fromRGB(18, 16, 14),
-		Shadow = Color3.fromRGB(169, 158, 137),
-	},
-	Candy = {
-		Background = Color3.fromRGB(31, 25, 44),
-		Panel = Color3.fromRGB(52, 42, 72),
-		PanelAlt = Color3.fromRGB(70, 55, 92),
-		Ink = Color3.fromRGB(255, 242, 252),
-		Muted = Color3.fromRGB(217, 184, 224),
-		Accent = Color3.fromRGB(255, 116, 190),
-		AccentAlt = Color3.fromRGB(108, 226, 255),
-		Good = Color3.fromRGB(124, 236, 159),
-		Bad = Color3.fromRGB(255, 95, 130),
-		Stroke = Color3.fromRGB(13, 9, 20),
-		Shadow = Color3.fromRGB(9, 6, 15),
+	Blood = {
+		Backdrop = Color3.fromRGB(53, 32, 34),
+		Left = Color3.fromRGB(238, 219, 197),
+		Panel = Color3.fromRGB(247, 237, 224),
+		PanelAlt = Color3.fromRGB(224, 197, 187),
+		Text = Color3.fromRGB(20, 10, 10),
+		Muted = Color3.fromRGB(95, 55, 55),
+		Ink = Color3.fromRGB(0, 0, 0),
+		SelectedTop = Color3.fromRGB(255, 209, 129),
+		SelectedBottom = Color3.fromRGB(188, 46, 52),
+		Bar = Color3.fromRGB(103, 77, 77),
+		BarFill = Color3.fromRGB(255, 80, 76),
+		Good = Color3.fromRGB(73, 179, 91),
+		Bad = Color3.fromRGB(215, 65, 65),
+		PanelTransparency = 0.22,
+		RowTransparency = 0.1,
 	},
 	Void = {
-		Background = Color3.fromRGB(10, 10, 14),
-		Panel = Color3.fromRGB(18, 18, 24),
-		PanelAlt = Color3.fromRGB(28, 28, 36),
-		Ink = Color3.fromRGB(235, 238, 245),
-		Muted = Color3.fromRGB(137, 143, 158),
-		Accent = Color3.fromRGB(158, 116, 255),
-		AccentAlt = Color3.fromRGB(255, 232, 99),
-		Good = Color3.fromRGB(98, 224, 151),
-		Bad = Color3.fromRGB(255, 88, 105),
-		Stroke = Color3.fromRGB(0, 0, 0),
-		Shadow = Color3.fromRGB(0, 0, 0),
+		Backdrop = Color3.fromRGB(25, 27, 34),
+		Left = Color3.fromRGB(215, 219, 235),
+		Panel = Color3.fromRGB(236, 239, 250),
+		PanelAlt = Color3.fromRGB(194, 202, 229),
+		Text = Color3.fromRGB(7, 9, 16),
+		Muted = Color3.fromRGB(58, 64, 88),
+		Ink = Color3.fromRGB(0, 0, 0),
+		SelectedTop = Color3.fromRGB(218, 235, 255),
+		SelectedBottom = Color3.fromRGB(66, 122, 218),
+		Bar = Color3.fromRGB(75, 80, 98),
+		BarFill = Color3.fromRGB(66, 208, 255),
+		Good = Color3.fromRGB(63, 178, 127),
+		Bad = Color3.fromRGB(204, 77, 98),
+		PanelTransparency = 0.18,
+		RowTransparency = 0.08,
+	},
+	Forest = {
+		Backdrop = Color3.fromRGB(32, 49, 43),
+		Left = Color3.fromRGB(218, 232, 204),
+		Panel = Color3.fromRGB(237, 244, 226),
+		PanelAlt = Color3.fromRGB(201, 221, 190),
+		Text = Color3.fromRGB(9, 22, 16),
+		Muted = Color3.fromRGB(55, 85, 68),
+		Ink = Color3.fromRGB(0, 0, 0),
+		SelectedTop = Color3.fromRGB(233, 255, 162),
+		SelectedBottom = Color3.fromRGB(72, 161, 98),
+		Bar = Color3.fromRGB(81, 102, 85),
+		BarFill = Color3.fromRGB(82, 222, 133),
+		Good = Color3.fromRGB(71, 184, 95),
+		Bad = Color3.fromRGB(206, 75, 73),
+		PanelTransparency = 0.2,
+		RowTransparency = 0.1,
+	},
+	Candy = {
+		Backdrop = Color3.fromRGB(55, 40, 68),
+		Left = Color3.fromRGB(247, 222, 236),
+		Panel = Color3.fromRGB(255, 242, 250),
+		PanelAlt = Color3.fromRGB(232, 200, 224),
+		Text = Color3.fromRGB(29, 16, 31),
+		Muted = Color3.fromRGB(104, 65, 105),
+		Ink = Color3.fromRGB(0, 0, 0),
+		SelectedTop = Color3.fromRGB(255, 239, 161),
+		SelectedBottom = Color3.fromRGB(232, 90, 173),
+		Bar = Color3.fromRGB(117, 93, 118),
+		BarFill = Color3.fromRGB(35, 211, 255),
+		Good = Color3.fromRGB(80, 195, 119),
+		Bad = Color3.fromRGB(224, 76, 116),
+		PanelTransparency = 0.18,
+		RowTransparency = 0.08,
 	},
 }
 
@@ -117,6 +115,21 @@ Window.__index = Window
 
 local Tab = {}
 Tab.__index = Tab
+
+local function kindOf(value)
+	if typeof then
+		return typeof(value)
+	end
+	return type(value)
+end
+
+local function isFunction(value)
+	return kindOf(value) == "function"
+end
+
+local function service(name)
+	return game:GetService(name)
+end
 
 local function cloneTheme(theme)
 	local copy = {}
@@ -127,10 +140,19 @@ local function cloneTheme(theme)
 end
 
 local function getTheme(name)
-	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.Cursed)
+	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.Paper)
 end
 
-local function safeFont()
+local function themeNames()
+	local names = {}
+	for name in pairs(CursedPaint.Themes) do
+		table.insert(names, name)
+	end
+	table.sort(names)
+	return names
+end
+
+local function handFont()
 	local ok, font = pcall(function()
 		return Enum.Font.FingerPaint
 	end)
@@ -139,23 +161,19 @@ local function safeFont()
 		return font
 	end
 
+	local okCartoon, cartoon = pcall(function()
+		return Enum.Font.Cartoon
+	end)
+
+	if okCartoon and cartoon then
+		return cartoon
+	end
+
 	return Enum.Font.GothamBold
 end
 
-local function service(name)
-	return game:GetService(name)
-end
-
-local function tween(instance, duration, goal, style, direction)
-	local tweenService = service("TweenService")
-	local info = TweenInfo.new(
-		duration or 0.15,
-		style or Enum.EasingStyle.Quad,
-		direction or Enum.EasingDirection.Out
-	)
-	local created = tweenService:Create(instance, info, goal)
-	created:Play()
-	return created
+local function bodyFont()
+	return Enum.Font.Gotham
 end
 
 local function make(className, props, children)
@@ -178,16 +196,9 @@ local function make(className, props, children)
 	return instance
 end
 
-local function round(parent, radius)
-	return make("UICorner", {
-		CornerRadius = UDim.new(0, radius or 8),
-		Parent = parent,
-	})
-end
-
-local function stroke(parent, color, thickness)
+local function stroke(parent, theme, thickness)
 	return make("UIStroke", {
-		Color = color,
+		Color = theme.Ink,
 		Thickness = thickness or 2,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 		Parent = parent,
@@ -204,42 +215,95 @@ local function padding(parent, left, top, right, bottom)
 	})
 end
 
-local function list(parent, paddingSize)
+local function list(parent, gap)
 	return make("UIListLayout", {
 		FillDirection = Enum.FillDirection.Vertical,
 		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, paddingSize or 8),
+		Padding = UDim.new(0, gap or 6),
 		Parent = parent,
 	})
 end
 
-local function grid(parent, cellSize, paddingSize)
+local function grid(parent, cellSize, gap)
 	return make("UIGridLayout", {
 		CellSize = cellSize,
-		CellPadding = UDim2.fromOffset(paddingSize or 8, paddingSize or 8),
+		CellPadding = UDim2.fromOffset(gap or 6, gap or 6),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Parent = parent,
 	})
 end
 
-local function autoY(frame, layout)
-	local function update()
-		frame.Size = UDim2.new(frame.Size.X.Scale, frame.Size.X.Offset, 0, layout.AbsoluteContentSize.Y)
+local function tween(instance, duration, goal)
+	local tweenService = service("TweenService")
+	local info = TweenInfo.new(duration or 0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local created = tweenService:Create(instance, info, goal)
+	created:Play()
+	return created
+end
+
+local function call(callback, ...)
+	if isFunction(callback) then
+		task.spawn(callback, ...)
+	end
+end
+
+local function normalizeFlag(title, flag)
+	if flag and flag ~= "" then
+		return tostring(flag)
 	end
 
+	return tostring(title or "flag"):lower():gsub("[^%w]+", "_"):gsub("^_+", ""):gsub("_+$", "")
+end
+
+local function boolText(value)
+	return value and "ON" or "OFF"
+end
+
+local function clampNumber(value, minValue, maxValue)
+	return math.clamp(tonumber(value) or minValue, minValue, maxValue)
+end
+
+local function roundToStep(value, step)
+	local stepValue = tonumber(step) or 1
+	if stepValue <= 0 then
+		return value
+	end
+	return math.floor((value / stepValue) + 0.5) * stepValue
+end
+
+local function colorToHex(color)
+	local r = math.floor(color.R * 255 + 0.5)
+	local g = math.floor(color.G * 255 + 0.5)
+	local b = math.floor(color.B * 255 + 0.5)
+	return string.format("#%02X%02X%02X", r, g, b)
+end
+
+local function hexToColor(value, fallback)
+	local text = tostring(value or "")
+	local r, g, b = text:match("^#?(%x%x)(%x%x)(%x%x)$")
+	if r then
+		return Color3.fromRGB(tonumber(r, 16), tonumber(g, 16), tonumber(b, 16))
+	end
+	return fallback
+end
+
+local function autoCanvas(scroll, layout)
+	local function update()
+		scroll.CanvasSize = UDim2.fromOffset(0, layout.AbsoluteContentSize.Y + 10)
+	end
 	update()
 	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(update)
 end
 
 local function resolveParent()
-	local ok, hui = pcall(function()
+	local okHui, hui = pcall(function()
 		if gethui then
 			return gethui()
 		end
 		return nil
 	end)
 
-	if ok and hui then
+	if okHui and hui then
 		return hui
 	end
 
@@ -268,144 +332,86 @@ local function protectGui(gui)
 	end)
 end
 
-local function setTextDefaults(label, textSize)
-	label.Font = safeFont()
-	label.TextSize = textSize or 18
+local function setHandText(label, size, align)
+	label.Font = handFont()
+	label.TextSize = size or 18
 	label.TextWrapped = true
-	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextXAlignment = align or Enum.TextXAlignment.Left
 	label.TextYAlignment = Enum.TextYAlignment.Center
 end
 
-local function boolText(value)
-	return value and "ON" or "OFF"
-end
-
-local function call(callback, ...)
-	if typeof(callback) == "function" then
-		task.spawn(callback, ...)
+local function updateStroke(parent, theme)
+	local outline = parent:FindFirstChildOfClass("UIStroke")
+	if outline then
+		outline.Color = theme.Ink
 	end
 end
 
-local function normalizeFlag(title, flag)
-	if flag and flag ~= "" then
-		return flag
-	end
-
-	return tostring(title or "flag"):lower():gsub("[^%w]+", "_"):gsub("^_+", ""):gsub("_+$", "")
-end
-
-local function clampNumber(value, minValue, maxValue)
-	return math.clamp(tonumber(value) or minValue, minValue, maxValue)
-end
-
-local function roundToStep(value, step)
-	local size = tonumber(step) or 1
-	if size <= 0 then
-		return value
-	end
-
-	return math.floor((value / size) + 0.5) * size
-end
-
-local function colorToHex(color)
-	local r = math.floor(color.R * 255 + 0.5)
-	local g = math.floor(color.G * 255 + 0.5)
-	local b = math.floor(color.B * 255 + 0.5)
-	return string.format("#%02X%02X%02X", r, g, b)
-end
-
-local function hexToColor(value, fallback)
-	local text = tostring(value or "")
-	local r, g, b = text:match("^#?(%x%x)(%x%x)(%x%x)$")
-	if r then
-		return Color3.fromRGB(tonumber(r, 16), tonumber(g, 16), tonumber(b, 16))
-	end
-	return fallback
-end
-
-local function themeNames()
-	local names = {}
-	for name in pairs(CursedPaint.Themes) do
-		table.insert(names, name)
-	end
-	table.sort(names)
-	return names
-end
-
-local function createBase(parent, theme)
-	local base = make("Frame", {
-		BackgroundColor3 = theme.Panel,
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 0, 46),
-		Parent = parent,
-	})
-	round(base, 8)
-	stroke(base, theme.Stroke, 2)
-	padding(base, 12, 8, 12, 8)
-	return base
-end
-
-local function createTitle(base, title, description, theme)
-	local titleLabel = make("TextLabel", {
-		BackgroundTransparency = 1,
-		Text = title or "Control",
-		TextColor3 = theme.Ink,
-		Size = UDim2.new(1, -92, 0, description and 20 or 28),
-		Parent = base,
-	})
-	setTextDefaults(titleLabel, 17)
-
-	local descLabel
-	if description and description ~= "" then
-		descLabel = make("TextLabel", {
-			BackgroundTransparency = 1,
-			Text = description,
-			TextColor3 = theme.Muted,
-			TextSize = 13,
-			Font = Enum.Font.Gotham,
-			TextWrapped = true,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = Enum.TextYAlignment.Top,
-			Position = UDim2.fromOffset(0, 22),
-			Size = UDim2.new(1, -92, 0, 34),
-			Parent = base,
-		})
-		base.Size = UDim2.new(1, 0, 0, 64)
-	end
-
-	return titleLabel, descLabel
-end
-
-local function makeSmallButton(parent, text, theme)
+local function makeButton(parent, text, theme, width)
 	local button = make("TextButton", {
 		AutoButtonColor = false,
-		BackgroundColor3 = theme.Accent,
+		BackgroundColor3 = theme.Panel,
+		BackgroundTransparency = theme.RowTransparency,
 		BorderSizePixel = 0,
-		Font = safeFont(),
+		Font = handFont(),
 		Text = text,
-		TextColor3 = theme.Ink,
-		TextSize = 15,
-		Size = UDim2.fromOffset(82, 30),
+		TextColor3 = theme.Text,
+		TextSize = 18,
+		Size = UDim2.fromOffset(width or 96, 31),
 		Parent = parent,
 	})
-	round(button, 7)
-	stroke(button, theme.Stroke, 2)
+	stroke(button, theme, 2)
 
 	button.MouseEnter:Connect(function()
-		tween(button, 0.12, { BackgroundColor3 = theme.AccentAlt })
+		tween(button, 0.1, { BackgroundTransparency = 0.02 })
 	end)
 
 	button.MouseLeave:Connect(function()
-		tween(button, 0.12, { BackgroundColor3 = theme.Accent })
+		tween(button, 0.1, { BackgroundTransparency = theme.RowTransparency })
 	end)
 
 	return button
 end
 
+local function createProgressBar(parent, theme, yOffset)
+	local track = make("Frame", {
+		Active = true,
+		BackgroundColor3 = theme.Bar,
+		BackgroundTransparency = 0.1,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 8, 0, yOffset),
+		Size = UDim2.new(1, -16, 0, 13),
+		Parent = parent,
+	})
+	stroke(track, theme, 1)
+
+	local fill = make("Frame", {
+		BackgroundColor3 = theme.BarFill,
+		BorderSizePixel = 0,
+		Size = UDim2.fromScale(0, 1),
+		Parent = track,
+	})
+
+	return track, fill
+end
+
+local function rowTitle(parent, title, theme, y, rightWidth)
+	local label = make("TextLabel", {
+		BackgroundTransparency = 1,
+		Text = tostring(title or "Control"),
+		TextColor3 = theme.Text,
+		Position = UDim2.fromOffset(8, y or 3),
+		Size = UDim2.new(1, -(rightWidth or 120), 0, 28),
+		Parent = parent,
+	})
+	setHandText(label, 21)
+	return label
+end
+
 function CursedPaint:CreateWindow(options)
 	options = options or {}
 
-	local themeName = options.Theme or "Cursed"
+	local themeName = options.Theme or "Paper"
 	local theme = getTheme(themeName)
 	local parent = options.Parent or resolveParent()
 	assert(parent, "CursedPaint UI could not find a UI parent.")
@@ -419,93 +425,76 @@ function CursedPaint:CreateWindow(options)
 	protectGui(gui)
 	gui.Parent = parent
 
-	local shadow = make("Frame", {
-		BackgroundColor3 = theme.Shadow,
-		BackgroundTransparency = 0.25,
+	local root = make("Frame", {
+		Active = true,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = theme.Backdrop,
+		BackgroundTransparency = theme.PanelTransparency,
 		BorderSizePixel = 0,
-		Position = options.Position or UDim2.fromOffset(92, 92),
-		Size = options.Size or UDim2.fromOffset(610, 468),
+		Position = options.Position or UDim2.fromScale(0.5, 0.5),
+		Size = options.Size or UDim2.fromOffset(650, 370),
+		ZIndex = 1,
 		Parent = gui,
 	})
-	round(shadow, 12)
+	stroke(root, theme, 2)
 
-	local main = make("Frame", {
-		BackgroundColor3 = theme.Background,
+	local texture = make("Frame", {
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 0.86,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(-5, -5),
-		Size = UDim2.fromScale(1, 1),
-		Parent = shadow,
+		Position = UDim2.fromOffset(4, 4),
+		Size = UDim2.new(1, -8, 1, -8),
+		ZIndex = 1,
+		Parent = root,
 	})
-	round(main, 12)
-	stroke(main, theme.Stroke, 3)
+	stroke(texture, theme, 1)
 
-	local top = make("Frame", {
-		BackgroundColor3 = theme.Panel,
+	local left = make("Frame", {
+		BackgroundColor3 = theme.Left,
+		BackgroundTransparency = 0.12,
 		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 0, 72),
-		Parent = main,
+		Position = UDim2.fromOffset(8, 8),
+		Size = UDim2.new(0, 176, 1, -16),
+		ZIndex = 3,
+		Parent = root,
 	})
-	round(top, 12)
-	stroke(top, theme.Stroke, 2)
+	stroke(left, theme, 1)
 
-	local title = make("TextLabel", {
-		BackgroundTransparency = 1,
-		Text = options.Title or "CursedPaint UI",
-		TextColor3 = theme.Ink,
-		Position = UDim2.fromOffset(18, 8),
-		Size = UDim2.new(1, -148, 0, 32),
-		Parent = top,
-	})
-	setTextDefaults(title, 24)
-
-	local subtitle = make("TextLabel", {
-		BackgroundTransparency = 1,
-		Text = options.Subtitle or "silly test panel",
-		TextColor3 = theme.Muted,
-		Font = Enum.Font.Gotham,
-		TextSize = 13,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.fromOffset(20, 42),
-		Size = UDim2.new(1, -164, 0, 18),
-		Parent = top,
-	})
-
-	local close = makeSmallButton(top, "X", theme)
-	close.Position = UDim2.new(1, -48, 0, 18)
-	close.Size = UDim2.fromOffset(30, 30)
-
-	local minimize = makeSmallButton(top, "-", theme)
-	minimize.Position = UDim2.new(1, -86, 0, 18)
-	minimize.Size = UDim2.fromOffset(30, 30)
-
-	local tabsBar = make("ScrollingFrame", {
+	local tabs = make("ScrollingFrame", {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(12, 82),
-		Size = UDim2.new(0, 154, 1, -94),
 		CanvasSize = UDim2.fromOffset(0, 0),
+		Position = UDim2.fromOffset(6, 6),
+		ScrollBarImageColor3 = theme.Ink,
 		ScrollBarThickness = 3,
-		ScrollBarImageColor3 = theme.Accent,
-		Parent = main,
+		Size = UDim2.new(1, -12, 1, -12),
+		ZIndex = 4,
+		Parent = left,
 	})
-	padding(tabsBar, 0, 0, 6, 0)
-	local tabsLayout = list(tabsBar, 7)
-	tabsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		tabsBar.CanvasSize = UDim2.fromOffset(0, tabsLayout.AbsoluteContentSize.Y + 8)
-	end)
+	local tabsLayout = list(tabs, 1)
+	autoCanvas(tabs, tabsLayout)
 
 	local content = make("Frame", {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Position = UDim2.fromOffset(178, 82),
-		Size = UDim2.new(1, -190, 1, -94),
-		Parent = main,
+		Position = UDim2.fromOffset(194, 8),
+		Size = UDim2.new(1, -202, 1, -16),
+		ZIndex = 3,
+		Parent = root,
 	})
+
+	local close = makeButton(root, "X", theme, 28)
+	close.Position = UDim2.new(1, -38, 0, 10)
+	close.ZIndex = 20
+
+	local minimize = makeButton(root, "-", theme, 28)
+	minimize.Position = UDim2.new(1, -72, 0, 10)
+	minimize.ZIndex = 20
 
 	local toastHolder = make("Frame", {
 		BackgroundTransparency = 1,
 		Position = UDim2.new(1, -330, 0, 16),
-		Size = UDim2.fromOffset(310, 420),
+		Size = UDim2.fromOffset(310, 330),
 		Parent = gui,
 	})
 	local toastLayout = list(toastHolder, 8)
@@ -513,12 +502,10 @@ function CursedPaint:CreateWindow(options)
 
 	local self = setmetatable({
 		ScreenGui = gui,
-		Root = shadow,
-		Main = main,
-		Top = top,
-		TitleLabel = title,
-		SubtitleLabel = subtitle,
-		TabsBar = tabsBar,
+		Root = root,
+		Texture = texture,
+		Left = left,
+		TabsBar = tabs,
 		Content = content,
 		ToastHolder = toastHolder,
 		ThemeName = themeName,
@@ -529,19 +516,29 @@ function CursedPaint:CreateWindow(options)
 		_tabs = {},
 		_tabButtons = {},
 		_activeTab = nil,
-		_minimized = false,
 		_visible = true,
-		_normalSize = shadow.Size,
+		_minimized = false,
+		_normalSize = root.Size,
 		_configFolder = options.ConfigFolder or "CursedPaintUI",
 	}, Window)
 
 	self:_bindTheme(function(nextTheme)
-		shadow.BackgroundColor3 = nextTheme.Shadow
-		main.BackgroundColor3 = nextTheme.Background
-		top.BackgroundColor3 = nextTheme.Panel
-		title.TextColor3 = nextTheme.Ink
-		subtitle.TextColor3 = nextTheme.Muted
-		tabsBar.ScrollBarImageColor3 = nextTheme.Accent
+		root.BackgroundColor3 = nextTheme.Backdrop
+		root.BackgroundTransparency = nextTheme.PanelTransparency
+		texture.BackgroundTransparency = 0.86
+		left.BackgroundColor3 = nextTheme.Left
+		tabs.ScrollBarImageColor3 = nextTheme.Ink
+		close.BackgroundColor3 = nextTheme.Panel
+		close.BackgroundTransparency = nextTheme.RowTransparency
+		close.TextColor3 = nextTheme.Text
+		minimize.BackgroundColor3 = nextTheme.Panel
+		minimize.BackgroundTransparency = nextTheme.RowTransparency
+		minimize.TextColor3 = nextTheme.Text
+		updateStroke(root, nextTheme)
+		updateStroke(texture, nextTheme)
+		updateStroke(left, nextTheme)
+		updateStroke(close, nextTheme)
+		updateStroke(minimize, nextTheme)
 	end)
 
 	close.MouseButton1Click:Connect(function()
@@ -552,13 +549,12 @@ function CursedPaint:CreateWindow(options)
 		self:SetMinimized(not self._minimized)
 	end)
 
-	self:_makeDraggable(top, shadow)
+	self:_makeDraggable(root, root)
 
 	local userInput = service("UserInputService")
-	local toggleKey = options.ToggleKey
-	if toggleKey then
+	if options.ToggleKey then
 		userInput.InputBegan:Connect(function(input, gameProcessed)
-			if not gameProcessed and input.KeyCode == toggleKey then
+			if not gameProcessed and input.KeyCode == options.ToggleKey then
 				self:SetVisible(not self._visible)
 			end
 		end)
@@ -585,8 +581,8 @@ function Window:SetTheme(name)
 
 	self.ThemeName = name
 	self.Theme = getTheme(name)
-	self:_applyTheme()
 	self.Flags.__theme = name
+	self:_applyTheme()
 	return true
 end
 
@@ -595,23 +591,21 @@ function Window:GetThemes()
 end
 
 function Window:SetVisible(visible)
-	self._visible = visible
-	self.Root.Visible = visible
+	self._visible = visible == true
+	self.Root.Visible = self._visible
 end
 
 function Window:SetMinimized(minimized)
-	self._minimized = minimized
-	local targetSize
-	if minimized then
-		targetSize = UDim2.fromOffset(self.Root.AbsoluteSize.X, 72)
-		self.TabsBar.Visible = false
+	self._minimized = minimized == true
+	if self._minimized then
+		self.Left.Visible = false
 		self.Content.Visible = false
+		tween(self.Root, 0.14, { Size = UDim2.fromOffset(140, 42) })
 	else
-		targetSize = self._normalSize
-		self.TabsBar.Visible = true
+		self.Left.Visible = true
 		self.Content.Visible = true
+		tween(self.Root, 0.14, { Size = self._normalSize })
 	end
-	tween(self.Root, 0.18, { Size = targetSize })
 end
 
 function Window:Destroy()
@@ -654,43 +648,51 @@ end
 
 function Window:CreateTab(title, icon)
 	local theme = self.Theme
+
 	local page = make("ScrollingFrame", {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Size = UDim2.fromScale(1, 1),
 		CanvasSize = UDim2.fromOffset(0, 0),
-		ScrollBarThickness = 4,
-		ScrollBarImageColor3 = theme.Accent,
+		ScrollBarImageColor3 = theme.Ink,
+		ScrollBarThickness = 3,
+		Size = UDim2.fromScale(1, 1),
 		Visible = false,
 		Parent = self.Content,
 	})
-	padding(page, 0, 0, 8, 0)
-	local pageLayout = list(page, 8)
-	pageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		page.CanvasSize = UDim2.fromOffset(0, pageLayout.AbsoluteContentSize.Y + 12)
-	end)
+	padding(page, 0, 0, 4, 0)
+	local pageLayout = list(page, 7)
+	autoCanvas(page, pageLayout)
 
 	local button = make("TextButton", {
 		AutoButtonColor = false,
-		BackgroundColor3 = theme.Panel,
+		BackgroundColor3 = theme.Left,
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Font = safeFont(),
-		Text = (icon and icon .. " " or "") .. tostring(title or "Tab"),
-		TextColor3 = theme.Muted,
+		Font = handFont(),
+		Text = (icon and icon ~= "" and (icon .. " ") or "") .. tostring(title or "Tab"),
+		TextColor3 = theme.Text,
 		TextSize = 16,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Size = UDim2.new(1, 0, 0, 42),
+		Size = UDim2.new(1, 0, 0, 28),
 		Parent = self.TabsBar,
 	})
-	round(button, 8)
-	stroke(button, theme.Stroke, 2)
-	padding(button, 12, 0, 8, 0)
+	stroke(button, theme, 1)
+
+	local gradient = make("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, theme.SelectedTop),
+			ColorSequenceKeypoint.new(1, theme.SelectedBottom),
+		}),
+		Enabled = false,
+		Rotation = 0,
+		Parent = button,
+	})
 
 	local tab = setmetatable({
 		Window = self,
 		Title = title,
-		Button = button,
 		Page = page,
+		Button = button,
+		Gradient = gradient,
 		Layout = pageLayout,
 	}, Tab)
 
@@ -698,9 +700,21 @@ function Window:CreateTab(title, icon)
 	self._tabButtons[tab] = button
 
 	self:_bindTheme(function(nextTheme)
-		page.ScrollBarImageColor3 = nextTheme.Accent
-		button.TextColor3 = self._activeTab == tab and nextTheme.Ink or nextTheme.Muted
-		button.BackgroundColor3 = self._activeTab == tab and nextTheme.Accent or nextTheme.Panel
+		page.ScrollBarImageColor3 = nextTheme.Ink
+		button.TextColor3 = nextTheme.Text
+		button.BackgroundColor3 = nextTheme.Left
+		updateStroke(button, nextTheme)
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, nextTheme.SelectedTop),
+			ColorSequenceKeypoint.new(1, nextTheme.SelectedBottom),
+		})
+		if self._activeTab == tab then
+			button.BackgroundTransparency = 0
+			gradient.Enabled = true
+		else
+			button.BackgroundTransparency = 1
+			gradient.Enabled = false
+		end
 	end)
 
 	button.MouseButton1Click:Connect(function()
@@ -717,72 +731,10 @@ end
 function Window:SelectTab(tab)
 	for _, other in ipairs(self._tabs) do
 		other.Page.Visible = other == tab
-		local button = self._tabButtons[other]
-		if button then
-			button.BackgroundColor3 = other == tab and self.Theme.Accent or self.Theme.Panel
-			button.TextColor3 = other == tab and self.Theme.Ink or self.Theme.Muted
-		end
+		other.Gradient.Enabled = other == tab
+		other.Button.BackgroundTransparency = other == tab and 0 or 1
 	end
 	self._activeTab = tab
-end
-
-function Window:Notify(options)
-	options = options or {}
-	local theme = self.Theme
-	local toast = make("Frame", {
-		BackgroundColor3 = theme.Panel,
-		BorderSizePixel = 0,
-		Size = UDim2.fromOffset(310, 0),
-		Parent = self.ToastHolder,
-	})
-	round(toast, 8)
-	stroke(toast, theme.Stroke, 2)
-	padding(toast, 12, 10, 12, 10)
-
-	local title = make("TextLabel", {
-		BackgroundTransparency = 1,
-		Text = options.Title or "CursedPaint",
-		TextColor3 = theme.Ink,
-		Size = UDim2.new(1, 0, 0, 22),
-		Parent = toast,
-	})
-	setTextDefaults(title, 17)
-
-	local body = make("TextLabel", {
-		BackgroundTransparency = 1,
-		Font = Enum.Font.Gotham,
-		Text = options.Content or options.Text or "Something happened.",
-		TextColor3 = theme.Muted,
-		TextSize = 13,
-		TextWrapped = true,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		Position = UDim2.fromOffset(0, 26),
-		Size = UDim2.new(1, 0, 0, 44),
-		Parent = toast,
-	})
-
-	toast.Size = UDim2.fromOffset(310, 84)
-	toast.BackgroundTransparency = 1
-	title.TextTransparency = 1
-	body.TextTransparency = 1
-	tween(toast, 0.16, { BackgroundTransparency = 0 })
-	tween(title, 0.16, { TextTransparency = 0 })
-	tween(body, 0.16, { TextTransparency = 0 })
-
-	task.delay(options.Duration or 3, function()
-		if toast.Parent then
-			tween(toast, 0.16, { BackgroundTransparency = 1 })
-			tween(title, 0.16, { TextTransparency = 1 })
-			tween(body, 0.16, { TextTransparency = 1 })
-			task.wait(0.18)
-			if toast.Parent then
-				toast:Destroy()
-			end
-		end
-	end)
-
-	return toast
 end
 
 function Window:_setFlag(flag, value)
@@ -791,6 +743,55 @@ end
 
 function Window:_registerFlag(flag, setter)
 	self._flagSetters[flag] = setter
+end
+
+function Window:Notify(options)
+	options = options or {}
+	local theme = self.Theme
+	local toast = make("Frame", {
+		BackgroundColor3 = theme.Panel,
+		BackgroundTransparency = theme.RowTransparency,
+		BorderSizePixel = 0,
+		Size = UDim2.fromOffset(310, 76),
+		Parent = self.ToastHolder,
+	})
+	stroke(toast, theme, 2)
+	padding(toast, 9, 5, 9, 5)
+
+	local title = make("TextLabel", {
+		BackgroundTransparency = 1,
+		Text = options.Title or "Notice",
+		TextColor3 = theme.Text,
+		Size = UDim2.new(1, 0, 0, 25),
+		Parent = toast,
+	})
+	setHandText(title, 18)
+
+	local body = make("TextLabel", {
+		BackgroundTransparency = 1,
+		Font = bodyFont(),
+		Text = options.Content or options.Text or "Something happened.",
+		TextColor3 = theme.Muted,
+		TextSize = 13,
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		Position = UDim2.fromOffset(0, 29),
+		Size = UDim2.new(1, 0, 1, -30),
+		Parent = toast,
+	})
+
+	task.delay(options.Duration or 3, function()
+		if toast.Parent then
+			tween(toast, 0.12, { BackgroundTransparency = 1 })
+			task.wait(0.14)
+			if toast.Parent then
+				toast:Destroy()
+			end
+		end
+	end)
+
+	return toast
 end
 
 function Window:SaveConfig(name)
@@ -802,20 +803,26 @@ function Window:SaveConfig(name)
 		version = CursedPaint.Version,
 	})
 
-	local saved = false
+	local savedToFile = false
 	pcall(function()
-		if makefolder and not isfolder(self._configFolder) then
-			makefolder(self._configFolder)
+		if makefolder then
+			local folderExists = false
+			if isfolder then
+				folderExists = isfolder(self._configFolder)
+			end
+			if not folderExists then
+				makefolder(self._configFolder)
+			end
 		end
 		if writefile then
 			writefile(self._configFolder .. "/" .. configName .. ".json", payload)
-			saved = true
+			savedToFile = true
 		end
 	end)
 
 	CursedPaint._memoryConfigs = CursedPaint._memoryConfigs or {}
 	CursedPaint._memoryConfigs[configName] = payload
-	return saved, payload
+	return savedToFile, payload
 end
 
 function Window:LoadConfig(name)
@@ -843,7 +850,7 @@ function Window:LoadConfig(name)
 	end)
 
 	if not ok or type(data) ~= "table" then
-		return false, "Config is not valid JSON."
+		return false, "Invalid config JSON."
 	end
 
 	if data.theme then
@@ -861,113 +868,90 @@ function Window:LoadConfig(name)
 	return true
 end
 
-function Tab:_base(options)
-	local base = createBase(self.Page, self.Window.Theme)
-	local titleLabel, descLabel = createTitle(base, options.Title, options.Description, self.Window.Theme)
+function Tab:_row(height)
+	local theme = self.Window.Theme
+	local row = make("Frame", {
+		BackgroundColor3 = theme.Panel,
+		BackgroundTransparency = theme.RowTransparency,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 0, height or 58),
+		Parent = self.Page,
+	})
+	stroke(row, theme, 2)
 
-	self.Window:_bindTheme(function(theme)
-		base.BackgroundColor3 = theme.Panel
-		titleLabel.TextColor3 = theme.Ink
-		if descLabel then
-			descLabel.TextColor3 = theme.Muted
-		end
-		local outline = base:FindFirstChildOfClass("UIStroke")
-		if outline then
-			outline.Color = theme.Stroke
-		end
+	self.Window:_bindTheme(function(nextTheme)
+		row.BackgroundColor3 = nextTheme.Panel
+		row.BackgroundTransparency = nextTheme.RowTransparency
+		updateStroke(row, nextTheme)
 	end)
 
-	return base
+	return row
 end
 
 function Tab:Section(title)
 	local theme = self.Window.Theme
-	local section = make("TextLabel", {
-		BackgroundColor3 = theme.Accent,
-		BorderSizePixel = 0,
-		Font = safeFont(),
-		Text = "  " .. tostring(title or "Section"),
-		TextColor3 = theme.Ink,
-		TextSize = 18,
-		TextXAlignment = Enum.TextXAlignment.Left,
+	local label = make("TextLabel", {
+		BackgroundTransparency = 1,
+		Text = tostring(title or "Section"),
+		TextColor3 = theme.Text,
 		Size = UDim2.new(1, 0, 0, 34),
 		Parent = self.Page,
 	})
-	round(section, 8)
-	stroke(section, theme.Stroke, 2)
+	setHandText(label, 22)
 
 	self.Window:_bindTheme(function(nextTheme)
-		section.BackgroundColor3 = nextTheme.Accent
-		section.TextColor3 = nextTheme.Ink
-		local outline = section:FindFirstChildOfClass("UIStroke")
-		if outline then
-			outline.Color = nextTheme.Stroke
-		end
+		label.TextColor3 = nextTheme.Text
 	end)
 
-	return section
+	return label
 end
 
 function Tab:Label(text)
 	local theme = self.Window.Theme
+	local row = self:_row(36)
 	local label = make("TextLabel", {
-		BackgroundColor3 = theme.PanelAlt,
-		BorderSizePixel = 0,
+		BackgroundTransparency = 1,
 		Text = tostring(text or "Label"),
-		TextColor3 = theme.Ink,
-		Size = UDim2.new(1, 0, 0, 36),
-		Parent = self.Page,
+		TextColor3 = theme.Text,
+		Position = UDim2.fromOffset(8, 0),
+		Size = UDim2.new(1, -16, 1, 0),
+		Parent = row,
 	})
-	setTextDefaults(label, 16)
-	padding(label, 12, 0, 12, 0)
-	round(label, 8)
-	stroke(label, theme.Stroke, 2)
+	setHandText(label, 17)
 
 	self.Window:_bindTheme(function(nextTheme)
-		label.BackgroundColor3 = nextTheme.PanelAlt
-		label.TextColor3 = nextTheme.Ink
+		label.TextColor3 = nextTheme.Text
 	end)
 
 	return {
 		Set = function(_, value)
 			label.Text = tostring(value)
 		end,
-		Instance = label,
+		Instance = row,
 	}
 end
 
 function Tab:Paragraph(options)
 	options = options or {}
 	local theme = self.Window.Theme
-	local frame = createBase(self.Page, theme)
-	frame.Size = UDim2.new(1, 0, 0, 96)
-
-	local title = make("TextLabel", {
-		BackgroundTransparency = 1,
-		Text = options.Title or "Paragraph",
-		TextColor3 = theme.Ink,
-		Size = UDim2.new(1, 0, 0, 24),
-		Parent = frame,
-	})
-	setTextDefaults(title, 18)
-
+	local row = self:_row(88)
+	local title = rowTitle(row, options.Title or "Info", theme, 2, 16)
 	local body = make("TextLabel", {
 		BackgroundTransparency = 1,
-		Font = Enum.Font.Gotham,
+		Font = bodyFont(),
 		Text = options.Content or options.Text or "",
 		TextColor3 = theme.Muted,
 		TextSize = 14,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
-		Position = UDim2.fromOffset(0, 30),
-		Size = UDim2.new(1, 0, 1, -30),
-		Parent = frame,
+		Position = UDim2.fromOffset(9, 33),
+		Size = UDim2.new(1, -18, 1, -38),
+		Parent = row,
 	})
 
 	self.Window:_bindTheme(function(nextTheme)
-		frame.BackgroundColor3 = nextTheme.Panel
-		title.TextColor3 = nextTheme.Ink
+		title.TextColor3 = nextTheme.Text
 		body.TextColor3 = nextTheme.Muted
 	end)
 
@@ -975,35 +959,142 @@ function Tab:Paragraph(options)
 		Set = function(_, value)
 			body.Text = tostring(value)
 		end,
-		Instance = frame,
+		Instance = row,
+	}
+end
+
+function Tab:Quest(options)
+	options = options or {}
+	local theme = self.Window.Theme
+	local maxValue = tonumber(options.Max) or 1
+	local value = clampNumber(options.Value or 0, 0, maxValue)
+	local row = self:_row(options.Height or 82)
+	local title = rowTitle(row, options.Title or "Quest", theme, 2, 16)
+	local counter = make("TextLabel", {
+		BackgroundTransparency = 1,
+		Text = tostring(value) .. "/" .. tostring(maxValue),
+		TextColor3 = theme.Text,
+		Position = UDim2.fromOffset(8, 33),
+		Size = UDim2.new(1, -16, 0, 24),
+		Parent = row,
+	})
+	setHandText(counter, 22)
+	local track, fill = createProgressBar(row, theme, 60)
+
+	local function set(nextValue, nextMax)
+		if nextMax then
+			maxValue = math.max(tonumber(nextMax) or maxValue, 1)
+		end
+		value = clampNumber(nextValue, 0, maxValue)
+		counter.Text = tostring(value) .. "/" .. tostring(maxValue)
+		fill.Size = UDim2.fromScale(value / math.max(maxValue, 1), 1)
+	end
+
+	set(value, maxValue)
+
+	self.Window:_bindTheme(function(nextTheme)
+		title.TextColor3 = nextTheme.Text
+		counter.TextColor3 = nextTheme.Text
+		track.BackgroundColor3 = nextTheme.Bar
+		fill.BackgroundColor3 = nextTheme.BarFill
+		updateStroke(track, nextTheme)
+	end)
+
+	return {
+		Set = function(_, nextValue, nextMax)
+			set(nextValue, nextMax)
+		end,
+		Get = function()
+			return value, maxValue
+		end,
+		Instance = row,
+	}
+end
+
+function Tab:Progress(options)
+	options = options or {}
+	local theme = self.Window.Theme
+	local maxValue = tonumber(options.Max) or 100
+	local value = clampNumber(options.Value or 0, 0, maxValue)
+	local row = self:_row(options.Height or 56)
+	local title = rowTitle(row, options.Title or "Progress", theme, 0, 16)
+	local track, fill = createProgressBar(row, theme, 36)
+
+	local function set(nextValue, nextMax)
+		if nextMax then
+			maxValue = math.max(tonumber(nextMax) or maxValue, 1)
+		end
+		value = clampNumber(nextValue, 0, maxValue)
+		title.Text = tostring(options.Title or "Progress") .. ": " .. tostring(math.floor((value / maxValue) * 100 + 0.5)) .. "%"
+		fill.Size = UDim2.fromScale(value / math.max(maxValue, 1), 1)
+	end
+
+	set(value, maxValue)
+
+	self.Window:_bindTheme(function(nextTheme)
+		title.TextColor3 = nextTheme.Text
+		track.BackgroundColor3 = nextTheme.Bar
+		fill.BackgroundColor3 = nextTheme.BarFill
+		updateStroke(track, nextTheme)
+	end)
+
+	return {
+		Set = function(_, nextValue, nextMax)
+			set(nextValue, nextMax)
+		end,
+		Get = function()
+			return value, maxValue
+		end,
+		Instance = row,
 	}
 end
 
 function Tab:Button(options)
 	options = options or {}
 	local theme = self.Window.Theme
-	local base = self:_base(options)
-	local button = makeSmallButton(base, options.ButtonText or "DO IT", theme)
+	local row = self:_row(56)
+	local title = rowTitle(row, options.Title or "Button", theme, 2, 128)
+	local desc
+	if options.Description then
+		desc = make("TextLabel", {
+			BackgroundTransparency = 1,
+			Font = bodyFont(),
+			Text = options.Description,
+			TextColor3 = theme.Muted,
+			TextSize = 12,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Position = UDim2.fromOffset(9, 32),
+			Size = UDim2.new(1, -140, 0, 18),
+			Parent = row,
+		})
+	end
+
+	local button = makeButton(row, options.ButtonText or "DO", theme, 105)
 	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, 0, 0.5, 0)
+	button.Position = UDim2.new(1, -8, 0.5, 0)
 
 	button.MouseButton1Click:Connect(function()
-		button.Rotation = math.random(-2, 2)
-		tween(button, 0.08, { Size = UDim2.fromOffset(76, 28) })
+		tween(button, 0.06, { Rotation = math.random(-2, 2) })
 		task.delay(0.08, function()
 			if button.Parent then
-				tween(button, 0.12, { Size = UDim2.fromOffset(82, 30) })
+				tween(button, 0.1, { Rotation = 0 })
 			end
 		end)
 		call(options.Callback)
 	end)
 
 	self.Window:_bindTheme(function(nextTheme)
-		button.BackgroundColor3 = nextTheme.Accent
-		button.TextColor3 = nextTheme.Ink
+		title.TextColor3 = nextTheme.Text
+		button.BackgroundColor3 = nextTheme.Panel
+		button.BackgroundTransparency = nextTheme.RowTransparency
+		button.TextColor3 = nextTheme.Text
+		updateStroke(button, nextTheme)
+		if desc then
+			desc.TextColor3 = nextTheme.Muted
+		end
 	end)
 
-	return base
+	return row
 end
 
 function Tab:Toggle(options)
@@ -1011,17 +1102,32 @@ function Tab:Toggle(options)
 	local theme = self.Window.Theme
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = options.Default == true
-	local base = self:_base(options)
-	local button = makeSmallButton(base, boolText(value), theme)
+	local row = self:_row(56)
+	local title = rowTitle(row, options.Title or "Toggle", theme, 2, 128)
+	local desc
+	if options.Description then
+		desc = make("TextLabel", {
+			BackgroundTransparency = 1,
+			Font = bodyFont(),
+			Text = options.Description,
+			TextColor3 = theme.Muted,
+			TextSize = 12,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Position = UDim2.fromOffset(9, 32),
+			Size = UDim2.new(1, -140, 0, 18),
+			Parent = row,
+		})
+	end
+	local button = makeButton(row, boolText(value), theme, 105)
 	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, 0, 0.5, 0)
-	button.BackgroundColor3 = value and theme.Good or theme.PanelAlt
+	button.Position = UDim2.new(1, -8, 0.5, 0)
 
 	local function set(nextValue, silent)
 		value = nextValue == true
 		self.Window:_setFlag(flag, value)
 		button.Text = boolText(value)
-		tween(button, 0.12, { BackgroundColor3 = value and self.Window.Theme.Good or self.Window.Theme.PanelAlt })
+		button.BackgroundColor3 = value and self.Window.Theme.BarFill or self.Window.Theme.PanelAlt
+		button.BackgroundTransparency = 0.05
 		if not silent then
 			call(options.Callback, value)
 		end
@@ -1035,17 +1141,24 @@ function Tab:Toggle(options)
 	set(value, true)
 
 	self.Window:_bindTheme(function(nextTheme)
-		button.TextColor3 = nextTheme.Ink
-		button.BackgroundColor3 = value and nextTheme.Good or nextTheme.PanelAlt
+		title.TextColor3 = nextTheme.Text
+		button.TextColor3 = nextTheme.Text
+		button.BackgroundColor3 = value and nextTheme.BarFill or nextTheme.PanelAlt
+		updateStroke(button, nextTheme)
+		if desc then
+			desc.TextColor3 = nextTheme.Muted
+		end
 	end)
 
 	return {
-		Set = set,
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
 		Get = function()
 			return value
 		end,
 		Flag = flag,
-		Instance = base,
+		Instance = row,
 	}
 end
 
@@ -1056,46 +1169,21 @@ function Tab:Slider(options)
 	local maxValue = tonumber(options.Max) or 100
 	local step = tonumber(options.Step) or 1
 	local flag = normalizeFlag(options.Title, options.Flag)
-	local value = clampNumber(options.Default or minValue, minValue, maxValue)
-	value = roundToStep(value, step)
-
-	local base = self:_base({
-		Title = options.Title,
-		Description = options.Description,
-	})
-	base.Size = UDim2.new(1, 0, 0, options.Description and 84 or 68)
-
+	local value = roundToStep(clampNumber(options.Default or minValue, minValue, maxValue), step)
+	local row = self:_row(72)
+	local title = rowTitle(row, options.Title or "Slider", theme, 1, 92)
 	local valueLabel = make("TextLabel", {
 		BackgroundTransparency = 1,
-		Font = safeFont(),
 		Text = tostring(value),
-		TextColor3 = theme.AccentAlt,
-		TextSize = 16,
+		TextColor3 = theme.Text,
+		Font = handFont(),
+		TextSize = 19,
 		TextXAlignment = Enum.TextXAlignment.Right,
-		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, 0, 0, 0),
-		Size = UDim2.fromOffset(82, 24),
-		Parent = base,
+		Position = UDim2.new(1, -88, 0, 3),
+		Size = UDim2.fromOffset(80, 24),
+		Parent = row,
 	})
-
-	local track = make("Frame", {
-		BackgroundColor3 = theme.PanelAlt,
-		BorderSizePixel = 0,
-		Position = UDim2.new(0, 0, 1, -18),
-		Size = UDim2.new(1, 0, 0, 10),
-		Parent = base,
-	})
-	round(track, 5)
-	stroke(track, theme.Stroke, 1)
-
-	local fill = make("Frame", {
-		BackgroundColor3 = theme.Accent,
-		BorderSizePixel = 0,
-		Size = UDim2.fromScale(0, 1),
-		Parent = track,
-	})
-	round(fill, 5)
-
+	local track, fill = createProgressBar(row, theme, 48)
 	local dragging = false
 	local userInput = service("UserInputService")
 
@@ -1104,13 +1192,13 @@ function Tab:Slider(options)
 		local alpha = (value - minValue) / math.max(maxValue - minValue, 0.0001)
 		self.Window:_setFlag(flag, value)
 		valueLabel.Text = tostring(value)
-		tween(fill, 0.08, { Size = UDim2.fromScale(alpha, 1) })
+		fill.Size = UDim2.fromScale(alpha, 1)
 		if not silent then
 			call(options.Callback, value)
 		end
 	end
 
-	local function readFromX(x)
+	local function readPosition(x)
 		local alpha = math.clamp((x - track.AbsolutePosition.X) / math.max(track.AbsoluteSize.X, 1), 0, 1)
 		set(minValue + ((maxValue - minValue) * alpha))
 	end
@@ -1118,13 +1206,13 @@ function Tab:Slider(options)
 	track.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
-			readFromX(input.Position.X)
+			readPosition(input.Position.X)
 		end
 	end)
 
 	userInput.InputChanged:Connect(function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			readFromX(input.Position.X)
+			readPosition(input.Position.X)
 		end
 	end)
 
@@ -1138,18 +1226,22 @@ function Tab:Slider(options)
 	set(value, true)
 
 	self.Window:_bindTheme(function(nextTheme)
-		valueLabel.TextColor3 = nextTheme.AccentAlt
-		track.BackgroundColor3 = nextTheme.PanelAlt
-		fill.BackgroundColor3 = nextTheme.Accent
+		title.TextColor3 = nextTheme.Text
+		valueLabel.TextColor3 = nextTheme.Text
+		track.BackgroundColor3 = nextTheme.Bar
+		fill.BackgroundColor3 = nextTheme.BarFill
+		updateStroke(track, nextTheme)
 	end)
 
 	return {
-		Set = set,
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
 		Get = function()
 			return value
 		end,
 		Flag = flag,
-		Instance = base,
+		Instance = row,
 	}
 end
 
@@ -1160,27 +1252,26 @@ function Tab:Dropdown(options)
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = options.Default or choices[1]
 	local open = false
-
-	local base = self:_base(options)
-	local button = makeSmallButton(base, tostring(value or "Pick"), theme)
+	local closedHeight = 56
+	local row = self:_row(closedHeight)
+	local title = rowTitle(row, options.Title or "Dropdown", theme, 2, 136)
+	local button = makeButton(row, tostring(value or "Pick"), theme, 124)
 	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, 0, 0.5, 0)
-	button.Size = UDim2.fromOffset(118, 30)
+	button.Position = UDim2.new(1, -8, 0, 28)
+	button.TextSize = 15
 
 	local menu = make("Frame", {
-		BackgroundColor3 = theme.PanelAlt,
+		BackgroundColor3 = theme.Panel,
+		BackgroundTransparency = 0,
 		BorderSizePixel = 0,
-		Position = UDim2.new(1, -118, 1, 6),
-		Size = UDim2.fromOffset(118, 0),
-		ClipsDescendants = true,
+		Position = UDim2.fromOffset(8, closedHeight),
+		Size = UDim2.new(1, -16, 0, 0),
 		Visible = false,
-		ZIndex = 8,
-		Parent = base,
+		ZIndex = 10,
+		Parent = row,
 	})
-	round(menu, 7)
-	stroke(menu, theme.Stroke, 2)
-	local menuLayout = list(menu, 2)
-	autoY(menu, menuLayout)
+	stroke(menu, theme, 2)
+	local menuLayout = list(menu, 0)
 
 	local function set(nextValue, silent)
 		value = nextValue
@@ -1194,25 +1285,31 @@ function Tab:Dropdown(options)
 	for _, choice in ipairs(choices) do
 		local option = make("TextButton", {
 			AutoButtonColor = false,
-			BackgroundTransparency = 1,
-			Font = safeFont(),
+			BackgroundColor3 = theme.Panel,
+			BackgroundTransparency = theme.RowTransparency,
+			BorderSizePixel = 0,
+			Font = handFont(),
 			Text = tostring(choice),
-			TextColor3 = theme.Ink,
-			TextSize = 14,
+			TextColor3 = theme.Text,
+			TextSize = 16,
 			Size = UDim2.new(1, 0, 0, 28),
-			ZIndex = 9,
+			ZIndex = 11,
 			Parent = menu,
 		})
 		option.MouseButton1Click:Connect(function()
 			set(choice)
 			open = false
 			menu.Visible = false
+			row.Size = UDim2.new(1, 0, 0, closedHeight)
 		end)
 	end
 
 	button.MouseButton1Click:Connect(function()
 		open = not open
 		menu.Visible = open
+		local menuHeight = #choices * 28
+		menu.Size = UDim2.new(1, -16, 0, menuHeight)
+		row.Size = UDim2.new(1, 0, 0, open and (closedHeight + menuHeight + 8) or closedHeight)
 	end)
 
 	self.Window:_registerFlag(flag, set)
@@ -1221,23 +1318,30 @@ function Tab:Dropdown(options)
 	end
 
 	self.Window:_bindTheme(function(nextTheme)
-		button.BackgroundColor3 = nextTheme.Accent
-		button.TextColor3 = nextTheme.Ink
-		menu.BackgroundColor3 = nextTheme.PanelAlt
+		title.TextColor3 = nextTheme.Text
+		button.BackgroundColor3 = nextTheme.Panel
+		button.BackgroundTransparency = nextTheme.RowTransparency
+		button.TextColor3 = nextTheme.Text
+		menu.BackgroundColor3 = nextTheme.Panel
+		updateStroke(button, nextTheme)
+		updateStroke(menu, nextTheme)
 		for _, child in ipairs(menu:GetChildren()) do
 			if child:IsA("TextButton") then
-				child.TextColor3 = nextTheme.Ink
+				child.TextColor3 = nextTheme.Text
+				child.BackgroundColor3 = nextTheme.Panel
 			end
 		end
 	end)
 
 	return {
-		Set = set,
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
 		Get = function()
 			return value
 		end,
 		Flag = flag,
-		Instance = base,
+		Instance = row,
 	}
 end
 
@@ -1245,24 +1349,25 @@ function Tab:Textbox(options)
 	options = options or {}
 	local theme = self.Window.Theme
 	local flag = normalizeFlag(options.Title, options.Flag)
-	local base = self:_base(options)
+	local row = self:_row(58)
+	local title = rowTitle(row, options.Title or "Textbox", theme, 2, 168)
 	local box = make("TextBox", {
 		BackgroundColor3 = theme.PanelAlt,
+		BackgroundTransparency = 0.05,
 		BorderSizePixel = 0,
 		ClearTextOnFocus = false,
-		Font = Enum.Font.Gotham,
-		PlaceholderText = options.Placeholder or "type here",
+		Font = bodyFont(),
+		PlaceholderText = options.Placeholder or "type",
 		Text = tostring(options.Default or ""),
-		TextColor3 = theme.Ink,
+		TextColor3 = theme.Text,
 		PlaceholderColor3 = theme.Muted,
 		TextSize = 14,
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, 0, 0.5, 0),
-		Size = UDim2.fromOffset(150, 30),
-		Parent = base,
+		Position = UDim2.new(1, -8, 0.5, 0),
+		Size = UDim2.fromOffset(154, 30),
+		Parent = row,
 	})
-	round(box, 7)
-	stroke(box, theme.Stroke, 1)
+	stroke(box, theme, 1)
 
 	local function set(nextValue, silent)
 		box.Text = tostring(nextValue or "")
@@ -1282,18 +1387,22 @@ function Tab:Textbox(options)
 	set(box.Text, true)
 
 	self.Window:_bindTheme(function(nextTheme)
+		title.TextColor3 = nextTheme.Text
 		box.BackgroundColor3 = nextTheme.PanelAlt
-		box.TextColor3 = nextTheme.Ink
+		box.TextColor3 = nextTheme.Text
 		box.PlaceholderColor3 = nextTheme.Muted
+		updateStroke(box, nextTheme)
 	end)
 
 	return {
-		Set = set,
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
 		Get = function()
 			return box.Text
 		end,
 		Flag = flag,
-		Instance = base,
+		Instance = row,
 	}
 end
 
@@ -1303,14 +1412,15 @@ function Tab:Keybind(options)
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = options.Default or Enum.KeyCode.RightShift
 	local listening = false
-	local base = self:_base(options)
-	local button = makeSmallButton(base, value.Name, theme)
+	local row = self:_row(56)
+	local title = rowTitle(row, options.Title or "Keybind", theme, 2, 136)
+	local button = makeButton(row, value.Name, theme, 124)
 	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, 0, 0.5, 0)
-	button.Size = UDim2.fromOffset(118, 30)
+	button.Position = UDim2.new(1, -8, 0.5, 0)
+	button.TextSize = 15
 
 	local function set(nextValue, silent)
-		if typeof(nextValue) == "string" then
+		if kindOf(nextValue) == "string" then
 			nextValue = Enum.KeyCode[nextValue] or value
 		end
 		value = nextValue
@@ -1341,13 +1451,23 @@ function Tab:Keybind(options)
 	self.Window:_registerFlag(flag, set)
 	set(value, true)
 
+	self.Window:_bindTheme(function(nextTheme)
+		title.TextColor3 = nextTheme.Text
+		button.BackgroundColor3 = nextTheme.Panel
+		button.BackgroundTransparency = nextTheme.RowTransparency
+		button.TextColor3 = nextTheme.Text
+		updateStroke(button, nextTheme)
+	end)
+
 	return {
-		Set = set,
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
 		Get = function()
 			return value
 		end,
 		Flag = flag,
-		Instance = base,
+		Instance = row,
 	}
 end
 
@@ -1356,38 +1476,37 @@ function Tab:ColorPicker(options)
 	local theme = self.Window.Theme
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local colors = options.Colors or {
-		Color3.fromRGB(255, 82, 92),
-		Color3.fromRGB(255, 193, 77),
-		Color3.fromRGB(88, 222, 129),
-		Color3.fromRGB(80, 170, 255),
-		Color3.fromRGB(190, 120, 255),
+		Color3.fromRGB(255, 80, 80),
+		Color3.fromRGB(255, 190, 70),
+		Color3.fromRGB(82, 222, 133),
+		Color3.fromRGB(21, 205, 244),
+		Color3.fromRGB(142, 113, 255),
 		Color3.fromRGB(255, 255, 255),
 	}
 	local value = options.Default or colors[1]
-	local base = self:_base(options)
-	base.Size = UDim2.new(1, 0, 0, options.Description and 92 or 70)
-
+	local row = self:_row(70)
+	local title = rowTitle(row, options.Title or "Color", theme, 2, 16)
 	local holder = make("Frame", {
 		BackgroundTransparency = 1,
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, 0, 0.5, 0),
-		Size = UDim2.fromOffset(174, 28),
-		Parent = base,
+		Position = UDim2.fromOffset(8, 36),
+		Size = UDim2.new(1, -16, 0, 26),
+		Parent = row,
 	})
-	grid(holder, UDim2.fromOffset(24, 24), 5)
+	grid(holder, UDim2.fromOffset(26, 22), 6)
 
 	local swatches = {}
 
 	local function set(nextValue, silent)
-		if typeof(nextValue) == "string" then
+		if kindOf(nextValue) == "string" then
 			nextValue = hexToColor(nextValue, value)
 		end
 		value = nextValue
 		self.Window:_setFlag(flag, colorToHex(value))
+		local selectedHex = colorToHex(value)
 		for swatch, color in pairs(swatches) do
 			local outline = swatch:FindFirstChildOfClass("UIStroke")
 			if outline then
-				outline.Thickness = color == value and 3 or 1
+				outline.Thickness = colorToHex(color) == selectedHex and 3 or 1
 			end
 		end
 		if not silent then
@@ -1403,8 +1522,7 @@ function Tab:ColorPicker(options)
 			Text = "",
 			Parent = holder,
 		})
-		round(swatch, 6)
-		stroke(swatch, theme.Stroke, 1)
+		stroke(swatch, theme, 1)
 		swatches[swatch] = color
 		swatch.MouseButton1Click:Connect(function()
 			set(color)
@@ -1414,72 +1532,31 @@ function Tab:ColorPicker(options)
 	self.Window:_registerFlag(flag, set)
 	set(value, true)
 
+	self.Window:_bindTheme(function(nextTheme)
+		title.TextColor3 = nextTheme.Text
+		for swatch in pairs(swatches) do
+			updateStroke(swatch, nextTheme)
+		end
+	end)
+
 	return {
-		Set = set,
+		Set = function(_, nextValue, silent)
+			set(nextValue, silent)
+		end,
 		Get = function()
 			return value
 		end,
 		Flag = flag,
-		Instance = base,
-	}
-end
-
-function Tab:Progress(options)
-	options = options or {}
-	local theme = self.Window.Theme
-	local value = tonumber(options.Value) or 0
-	local maxValue = tonumber(options.Max) or 100
-	local base = self:_base({
-		Title = options.Title,
-		Description = options.Description,
-	})
-	base.Size = UDim2.new(1, 0, 0, options.Description and 84 or 68)
-
-	local track = make("Frame", {
-		BackgroundColor3 = theme.PanelAlt,
-		BorderSizePixel = 0,
-		Position = UDim2.new(0, 0, 1, -18),
-		Size = UDim2.new(1, 0, 0, 10),
-		Parent = base,
-	})
-	round(track, 5)
-
-	local fill = make("Frame", {
-		BackgroundColor3 = theme.AccentAlt,
-		BorderSizePixel = 0,
-		Size = UDim2.fromScale(0, 1),
-		Parent = track,
-	})
-	round(fill, 5)
-
-	local function set(nextValue)
-		value = clampNumber(nextValue, 0, maxValue)
-		fill.Size = UDim2.fromScale(value / math.max(maxValue, 1), 1)
-	end
-
-	set(value)
-
-	self.Window:_bindTheme(function(nextTheme)
-		track.BackgroundColor3 = nextTheme.PanelAlt
-		fill.BackgroundColor3 = nextTheme.AccentAlt
-	end)
-
-	return {
-		Set = set,
-		Get = function()
-			return value
-		end,
-		Instance = base,
+		Instance = row,
 	}
 end
 
 function Tab:ThemeDropdown(title)
 	return self:Dropdown({
 		Title = title or "Theme",
-		Description = "Swap the paint job.",
+		Flag = "__theme",
 		Options = self.Window:GetThemes(),
 		Default = self.Window.ThemeName,
-		Flag = "__theme",
 		Callback = function(themeName)
 			self.Window:SetTheme(themeName)
 		end,
@@ -1491,11 +1568,12 @@ function CursedPaint:Notify(options)
 	if window then
 		return window:Notify(options)
 	end
+	return nil
 end
 
-local originalCreateWindow = CursedPaint.CreateWindow
+local createWindow = CursedPaint.CreateWindow
 function CursedPaint:CreateWindow(options)
-	local window = originalCreateWindow(self, options)
+	local window = createWindow(self, options)
 	CursedPaint._lastWindow = window
 	return window
 end
