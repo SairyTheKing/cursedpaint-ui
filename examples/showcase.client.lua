@@ -6,7 +6,6 @@ local DemoImage = CursedPaint:GetPlaceholderImage()
 
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Brawl",
 	Size = UDim2.fromOffset(780, 460),
 	MinSize = Vector2.new(580, 350),
 	Resizable = true,
@@ -26,8 +25,8 @@ Window:AddTab("-")
 
 Main:AddSection("CursedPaint UI")
 Main:AddBanner({
-	Title = "Brawl Sketch Menu",
-	Caption = "Bigger, animated, rounded, and built for quick Luau panels.",
+	Title = "JJS Sketch Menu",
+	Caption = "Thick outlines, paper panels, yellow tabs, and cyan progress bars.",
 	Image = DemoImage,
 	ImageTransparency = 0.18,
 })
@@ -167,15 +166,6 @@ Visuals:AddButton({
 })
 
 Settings:AddSection("Settings")
-Settings:AddDropdown({
-	Title = "Theme",
-	Flag = "theme_select",
-	Options = Window:GetThemes(),
-	Default = "Brawl",
-	Callback = function(theme)
-		Window:SetTheme(theme)
-	end,
-})
 Settings:AddSlider({
 	Title = "Motion Speed",
 	Flag = "motion_speed",

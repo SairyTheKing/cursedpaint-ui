@@ -1,87 +1,38 @@
-# Themes
+# Theme
 
-CursedPaint ships with eight themes:
+CursedPaint now ships with one default style:
 
-- `Brawl` default
-- `Dark`
-- `Paper`
-- `Smoke`
-- `Blood`
-- `Void`
-- `Forest`
-- `Candy`
+- `JJS`
 
-Set a theme when creating the window:
+It is a sketch-menu style with thick black outlines, a pale yellow side menu, white/gray paper rows, yellow-orange selected tabs, and cyan progress bars.
 
 ```lua
 local Window = CursedPaint:CreateWindow({
-	Theme = "Brawl",
+	Title = "CursedPaint",
 })
 ```
 
-Change it later:
+`Window:SetTheme(...)` still exists for old scripts, but it always reapplies the single `JJS` style.
+
+## Style Keys
 
 ```lua
-Window:SetTheme("Blood")
-```
-
-Add a theme dropdown:
-
-```lua
-local Settings = Window:CreateTab("Settings")
-Settings:ThemeDropdown("Theme")
-```
-
-## Custom Theme
-
-Add a new theme before creating your window:
-
-```lua
-CursedPaint.Themes.MyTheme = {
-	Backdrop = Color3.fromRGB(35, 35, 38),
-	Left = Color3.fromRGB(232, 226, 176),
-	Panel = Color3.fromRGB(238, 238, 231),
-	PanelAlt = Color3.fromRGB(204, 205, 199),
-	Text = Color3.fromRGB(13, 13, 13),
-	Muted = Color3.fromRGB(47, 47, 47),
+CursedPaint.Themes.JJS = {
+	Backdrop = Color3.fromRGB(115, 115, 112),
+	Left = Color3.fromRGB(246, 241, 183),
+	Panel = Color3.fromRGB(242, 242, 235),
+	PanelAlt = Color3.fromRGB(190, 190, 184),
+	Text = Color3.fromRGB(8, 8, 8),
+	Muted = Color3.fromRGB(34, 34, 34),
 	Ink = Color3.fromRGB(0, 0, 0),
-	SelectedTop = Color3.fromRGB(255, 246, 143),
-	SelectedBottom = Color3.fromRGB(213, 93, 58),
-	Bar = Color3.fromRGB(88, 88, 86),
-	BarFill = Color3.fromRGB(18, 203, 245),
-	Good = Color3.fromRGB(69, 190, 102),
-	Bad = Color3.fromRGB(220, 67, 70),
-	PanelTransparency = 0.16,
-	RowTransparency = 0.08,
-	TextureTransparency = 0.8,
-	GlowTransparency = 0.78,
-	Radius = 9,
-	StrokeThickness = 1.8,
+	SelectedTop = Color3.fromRGB(255, 246, 124),
+	SelectedBottom = Color3.fromRGB(210, 89, 52),
+	Bar = Color3.fromRGB(92, 92, 88),
+	BarFill = Color3.fromRGB(10, 204, 245),
+	PanelTransparency = 0.32,
+	RowTransparency = 0.1,
+	Radius = 5,
+	StrokeThickness = 3,
+	ThinStrokeThickness = 2,
 }
-
-local Window = CursedPaint:CreateWindow({
-	Theme = "MyTheme",
-})
 ```
-
-## Color Keys
-
-- `Backdrop`: outer board color.
-- `Left`: left tab menu color.
-- `Panel`: control row color.
-- `PanelAlt`: input and secondary color.
-- `Text`: main text color.
-- `Muted`: helper text color.
-- `Ink`: border color.
-- `SelectedTop`: selected tab gradient top.
-- `SelectedBottom`: selected tab gradient bottom.
-- `Bar`: progress track color.
-- `BarFill`: progress fill color.
-- `Good`: enabled state color.
-- `Bad`: negative/error color.
-- `PanelTransparency`: outer board transparency.
-- `RowTransparency`: control row transparency.
-- `TextureTransparency`: subtle inner paper/glass overlay transparency.
-- `GlowTransparency`: subtle accent glow transparency.
-- `Radius`: corner radius in pixels.
-- `StrokeThickness`: default border thickness.

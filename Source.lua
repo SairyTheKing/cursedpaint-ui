@@ -3,7 +3,7 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.6.2"
+CursedPaint.Version = "0.7.0"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
 CursedPaint._fontFaceCache = {}
@@ -14,149 +14,27 @@ CursedPaint.Motion = {
 }
 
 CursedPaint.Themes = {
-	Brawl = {
-		Backdrop = Color3.fromRGB(39, 39, 42),
-		Left = Color3.fromRGB(238, 234, 194),
-		Panel = Color3.fromRGB(244, 244, 238),
-		PanelAlt = Color3.fromRGB(211, 212, 206),
-		Text = Color3.fromRGB(13, 13, 13),
-		Muted = Color3.fromRGB(47, 47, 47),
+	JJS = {
+		Backdrop = Color3.fromRGB(115, 115, 112),
+		Left = Color3.fromRGB(246, 241, 183),
+		Panel = Color3.fromRGB(242, 242, 235),
+		PanelAlt = Color3.fromRGB(190, 190, 184),
+		Text = Color3.fromRGB(8, 8, 8),
+		Muted = Color3.fromRGB(34, 34, 34),
 		Ink = Color3.fromRGB(0, 0, 0),
-		SelectedTop = Color3.fromRGB(255, 246, 143),
-		SelectedBottom = Color3.fromRGB(213, 93, 58),
-		Bar = Color3.fromRGB(88, 88, 86),
-		BarFill = Color3.fromRGB(18, 203, 245),
-		Good = Color3.fromRGB(69, 190, 102),
-		Bad = Color3.fromRGB(220, 67, 70),
-		PanelTransparency = 0.08,
-		RowTransparency = 0.04,
-		TextureTransparency = 0.9,
-		GlowTransparency = 0.9,
-		Radius = 9,
-		StrokeThickness = 1.8,
-	},
-	Dark = {
-		Backdrop = Color3.fromRGB(10, 11, 15),
-		Left = Color3.fromRGB(18, 19, 24),
-		Panel = Color3.fromRGB(29, 31, 39),
-		PanelAlt = Color3.fromRGB(42, 44, 54),
-		Text = Color3.fromRGB(246, 241, 232),
-		Muted = Color3.fromRGB(170, 164, 154),
-		Ink = Color3.fromRGB(2, 3, 6),
-		SelectedTop = Color3.fromRGB(79, 84, 107),
-		SelectedBottom = Color3.fromRGB(151, 86, 123),
-		Bar = Color3.fromRGB(62, 67, 84),
-		BarFill = Color3.fromRGB(18, 203, 245),
-		Good = Color3.fromRGB(76, 220, 128),
-		Bad = Color3.fromRGB(238, 81, 90),
-		PanelTransparency = 0.02,
-		RowTransparency = 0.04,
-		TextureTransparency = 0.84,
-		GlowTransparency = 0.76,
-		Radius = 11,
-		StrokeThickness = 1.5,
-	},
-	Paper = {
-		Backdrop = Color3.fromRGB(226, 224, 215),
-		Left = Color3.fromRGB(238, 235, 204),
-		Panel = Color3.fromRGB(245, 244, 238),
-		PanelAlt = Color3.fromRGB(223, 221, 214),
-		Text = Color3.fromRGB(18, 18, 18),
-		Muted = Color3.fromRGB(60, 60, 60),
-		Ink = Color3.fromRGB(0, 0, 0),
-		SelectedTop = Color3.fromRGB(255, 246, 158),
-		SelectedBottom = Color3.fromRGB(214, 98, 62),
-		Bar = Color3.fromRGB(103, 103, 99),
-		BarFill = Color3.fromRGB(21, 205, 244),
-		Good = Color3.fromRGB(61, 183, 100),
-		Bad = Color3.fromRGB(215, 65, 65),
-		PanelTransparency = 0.24,
-		RowTransparency = 0.12,
-	},
-	Smoke = {
-		Backdrop = Color3.fromRGB(196, 196, 190),
-		Left = Color3.fromRGB(221, 218, 198),
-		Panel = Color3.fromRGB(244, 244, 240),
-		PanelAlt = Color3.fromRGB(205, 205, 200),
-		Text = Color3.fromRGB(12, 12, 12),
-		Muted = Color3.fromRGB(67, 67, 67),
-		Ink = Color3.fromRGB(0, 0, 0),
-		SelectedTop = Color3.fromRGB(255, 255, 215),
-		SelectedBottom = Color3.fromRGB(145, 145, 145),
-		Bar = Color3.fromRGB(82, 82, 82),
-		BarFill = Color3.fromRGB(50, 215, 255),
-		Good = Color3.fromRGB(67, 171, 94),
-		Bad = Color3.fromRGB(201, 67, 67),
-		PanelTransparency = 0.18,
-		RowTransparency = 0.08,
-	},
-	Blood = {
-		Backdrop = Color3.fromRGB(53, 32, 34),
-		Left = Color3.fromRGB(238, 219, 197),
-		Panel = Color3.fromRGB(247, 237, 224),
-		PanelAlt = Color3.fromRGB(224, 197, 187),
-		Text = Color3.fromRGB(20, 10, 10),
-		Muted = Color3.fromRGB(95, 55, 55),
-		Ink = Color3.fromRGB(0, 0, 0),
-		SelectedTop = Color3.fromRGB(255, 209, 129),
-		SelectedBottom = Color3.fromRGB(188, 46, 52),
-		Bar = Color3.fromRGB(103, 77, 77),
-		BarFill = Color3.fromRGB(255, 80, 76),
-		Good = Color3.fromRGB(73, 179, 91),
-		Bad = Color3.fromRGB(215, 65, 65),
-		PanelTransparency = 0.22,
+		SelectedTop = Color3.fromRGB(255, 246, 124),
+		SelectedBottom = Color3.fromRGB(210, 89, 52),
+		Bar = Color3.fromRGB(92, 92, 88),
+		BarFill = Color3.fromRGB(10, 204, 245),
+		Good = Color3.fromRGB(68, 188, 100),
+		Bad = Color3.fromRGB(220, 62, 66),
+		PanelTransparency = 0.32,
 		RowTransparency = 0.1,
-	},
-	Void = {
-		Backdrop = Color3.fromRGB(25, 27, 34),
-		Left = Color3.fromRGB(215, 219, 235),
-		Panel = Color3.fromRGB(236, 239, 250),
-		PanelAlt = Color3.fromRGB(194, 202, 229),
-		Text = Color3.fromRGB(7, 9, 16),
-		Muted = Color3.fromRGB(58, 64, 88),
-		Ink = Color3.fromRGB(0, 0, 0),
-		SelectedTop = Color3.fromRGB(218, 235, 255),
-		SelectedBottom = Color3.fromRGB(66, 122, 218),
-		Bar = Color3.fromRGB(75, 80, 98),
-		BarFill = Color3.fromRGB(66, 208, 255),
-		Good = Color3.fromRGB(63, 178, 127),
-		Bad = Color3.fromRGB(204, 77, 98),
-		PanelTransparency = 0.18,
-		RowTransparency = 0.08,
-	},
-	Forest = {
-		Backdrop = Color3.fromRGB(32, 49, 43),
-		Left = Color3.fromRGB(218, 232, 204),
-		Panel = Color3.fromRGB(237, 244, 226),
-		PanelAlt = Color3.fromRGB(201, 221, 190),
-		Text = Color3.fromRGB(9, 22, 16),
-		Muted = Color3.fromRGB(55, 85, 68),
-		Ink = Color3.fromRGB(0, 0, 0),
-		SelectedTop = Color3.fromRGB(233, 255, 162),
-		SelectedBottom = Color3.fromRGB(72, 161, 98),
-		Bar = Color3.fromRGB(81, 102, 85),
-		BarFill = Color3.fromRGB(82, 222, 133),
-		Good = Color3.fromRGB(71, 184, 95),
-		Bad = Color3.fromRGB(206, 75, 73),
-		PanelTransparency = 0.2,
-		RowTransparency = 0.1,
-	},
-	Candy = {
-		Backdrop = Color3.fromRGB(55, 40, 68),
-		Left = Color3.fromRGB(247, 222, 236),
-		Panel = Color3.fromRGB(255, 242, 250),
-		PanelAlt = Color3.fromRGB(232, 200, 224),
-		Text = Color3.fromRGB(29, 16, 31),
-		Muted = Color3.fromRGB(104, 65, 105),
-		Ink = Color3.fromRGB(0, 0, 0),
-		SelectedTop = Color3.fromRGB(255, 239, 161),
-		SelectedBottom = Color3.fromRGB(232, 90, 173),
-		Bar = Color3.fromRGB(117, 93, 118),
-		BarFill = Color3.fromRGB(35, 211, 255),
-		Good = Color3.fromRGB(80, 195, 119),
-		Bad = Color3.fromRGB(224, 76, 116),
-		PanelTransparency = 0.18,
-		RowTransparency = 0.08,
+		TextureTransparency = 0.92,
+		GlowTransparency = 1,
+		Radius = 5,
+		StrokeThickness = 3,
+		ThinStrokeThickness = 2,
 	},
 }
 
@@ -190,7 +68,7 @@ local function cloneTheme(theme)
 end
 
 local function getTheme(name)
-	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.Brawl or CursedPaint.Themes.Dark or CursedPaint.Themes.Paper)
+	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.JJS)
 end
 
 local function themeNames()
@@ -384,9 +262,18 @@ local function make(className, props, children)
 end
 
 local function stroke(parent, theme, thickness)
+	local defaultThickness = theme.StrokeThickness or 2
+	local thinThickness = theme.ThinStrokeThickness or math.max(defaultThickness - 1, 1)
+	local resolved = thickness or defaultThickness
+	if thickness and thickness <= 1 then
+		resolved = thinThickness
+	elseif thickness then
+		resolved = math.max(thickness, defaultThickness)
+	end
+
 	return make("UIStroke", {
 		Color = theme.Ink,
-		Thickness = thickness or theme.StrokeThickness or 2,
+		Thickness = resolved,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 		Parent = parent,
 	})
@@ -878,7 +765,7 @@ function CursedPaint:CreateWindow(options)
 		CursedPaint.FontFace = options.FontFace
 	end
 
-	local themeName = options.Theme or "Brawl"
+	local themeName = "JJS"
 	local theme = getTheme(themeName)
 	local parent = options.Parent or resolveParent()
 	assert(parent, "CursedPaint UI could not find a UI parent.")
@@ -1229,15 +1116,11 @@ function Window:SetTheme(name)
 		return false
 	end
 
-	if not CursedPaint.Themes[name] then
-		return false
-	end
-
-	self.ThemeName = name
-	self.Theme = getTheme(name)
-	self.Flags.__theme = name
+	self.ThemeName = "JJS"
+	self.Theme = getTheme("JJS")
+	self.Flags.__theme = "JJS"
 	self:_applyTheme()
-	return true
+	return name == nil or name == "JJS"
 end
 
 function Window:_track(connection)

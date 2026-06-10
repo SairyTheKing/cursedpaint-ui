@@ -18,12 +18,14 @@ local library = chunk()
 assert(type(library) == "table", "Source.lua must return a table")
 assert(type(library.CreateWindow) == "function", "CreateWindow is missing")
 assert(type(library.Themes) == "table", "Themes table is missing")
-assert(library.Themes.Brawl ~= nil, "Brawl theme is missing")
-assert(library.Themes.Dark ~= nil, "Dark theme is missing")
-assert(library.Themes.Paper ~= nil, "Paper theme is missing")
-assert(library.Themes.Blood ~= nil, "Blood theme is missing")
-assert(library.Themes.Void ~= nil, "Void theme is missing")
-assert(library.Version == "0.6.2", "Version should be 0.6.2")
+assert(library.Themes.JJS ~= nil, "JJS theme is missing")
+local themeCount = 0
+for _ in pairs(library.Themes) do
+	themeCount = themeCount + 1
+end
+assert(themeCount == 1, "Only the JJS theme should ship")
+assert(library.Themes.JJS.StrokeThickness >= 3, "JJS outline should be thick")
+assert(library.Version == "0.7.0", "Version should be 0.7.0")
 assert(library.Font == "FingerPaint", "Default font should be FingerPaint")
 assert(type(library.SetMotion) == "function", "SetMotion is missing")
 

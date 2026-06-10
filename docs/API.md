@@ -5,7 +5,6 @@
 ```lua
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Brawl",
 	Size = UDim2.fromOffset(780, 460),
 	MinSize = Vector2.new(580, 350),
 	Position = UDim2.fromScale(0.5, 0.5),
@@ -21,7 +20,7 @@ local Window = CursedPaint:CreateWindow({
 
 Options:
 
-- `Theme`: theme name. Default is `Brawl`.
+- `Theme`: ignored. CursedPaint now ships one `JJS` style.
 - `Size`: window size.
 - `MinSize`: resize limit as `Vector2` or offset `UDim2`.
 - `Position`: window position.
@@ -57,7 +56,7 @@ Window:CreateTab("Main")
 ## Window Methods
 
 ```lua
-Window:SetTheme("Paper")
+Window:SetTheme("JJS")
 Window:SetFont("Cartoon")
 Window:SetMotion(true, 1.25)
 Window:SetVisible(true)
@@ -69,6 +68,8 @@ Window:SaveConfig("main")
 Window:LoadConfig("main")
 Window:Destroy()
 ```
+
+`Window:SetTheme(...)` is kept for old scripts, but it always reapplies the single `JJS` style.
 
 Global motion setting:
 
