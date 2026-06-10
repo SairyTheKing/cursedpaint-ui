@@ -1,0 +1,12 @@
+{
+  "name": "CursedPaintUI",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "CursedPaintUI": {
+        "$path": "Source.lua"
+      }
+    }
+  }
+}
