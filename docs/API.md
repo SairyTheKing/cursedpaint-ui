@@ -44,11 +44,12 @@ Window:SetFont("rbxasset://fonts/families/FingerPaint.json")
 Window:SetFont("rbxassetid://123456789")
 ```
 
-CursedPaint tries the bundled GitHub `.ttf`, `Font.fromName`, known font family paths, explicit `FontFace` values, and then Roblox enum fonts. The `.ttf` path needs executor file APIs: `writefile` and `getcustomasset`.
+CursedPaint tries `rbxassetid://12187375716` through `Font.fromId`, the bundled GitHub `.ttf`, `Font.fromName`, known font family paths, explicit `FontFace` values, and then Roblox enum fonts. The `.ttf` path needs executor file APIs: `writefile` and `getcustomasset`.
 
-Bundled font:
+Default font:
 
 ```lua
+print(CursedPaint.FontAssetId)
 print(CursedPaint.FontFile)
 print(CursedPaint.FontFileUrl)
 Window:SetFont("FingerPaint")

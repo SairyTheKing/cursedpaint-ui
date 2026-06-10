@@ -4,7 +4,7 @@
 
 CursedPaint UI is a simple Roblox Luau UI library for testing panels, script menus, settings pages, and showcase interfaces.
 
-It uses one JJS-style sketch-menu theme by default: thick black outlines, pale side tabs, white paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint text is attempted through the bundled GitHub `.ttf`, Roblox `Font.fromName`, family paths, and enum fallback.
+It uses one JJS-style sketch-menu theme by default: thick black outlines, pale side tabs, white paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint text is attempted through a Roblox font asset, the bundled GitHub `.ttf`, Roblox `Font.fromName`, family paths, and enum fallback.
 
 ## Load
 
@@ -56,7 +56,7 @@ Main:AddSlider({
 
 - One default `JJS` sketch theme.
 - Thick black outlines across windows, tabs, rows, buttons, inputs, and bars.
-- Bundled `FingerPaint-Regular.ttf` loader on every text object, with custom font asset support and Roblox fallback.
+- Default `rbxassetid://12187375716` font asset on every text object, with bundled TTF and Roblox fallback.
 - Draggable, minimizable, closable, toggleable, and resizable window.
 - Animated opening, tab switching, toasts, rows, buttons, and progress bars.
 - Tabs, sections, labels, paragraphs, images, banners, quests, and progress bars.
@@ -96,13 +96,19 @@ Window:SetFont("FingerPaint")
 print(CursedPaint:GetFontStatus().Method)
 ```
 
-CursedPaint automatically tries to download:
+CursedPaint tries this Roblox font asset first:
+
+```lua
+print(CursedPaint.FontAssetId) -- rbxassetid://12187375716
+```
+
+If that does not load, CursedPaint can try the bundled TTF:
 
 ```lua
 print(CursedPaint.FontFileUrl)
 ```
 
-This needs executor file APIs: `writefile` and `getcustomasset`. If your client still shows a normal Roblox font, upload/import the font to Roblox and use:
+The TTF fallback needs executor file APIs: `writefile` and `getcustomasset`. To override the default:
 
 ```lua
 Window:SetFont("rbxassetid://YOUR_FONT_ASSET_ID")

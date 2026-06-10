@@ -3,13 +3,14 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.7.2"
+CursedPaint.Version = "0.7.3"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
 CursedPaint._downloadedFontAssets = {}
 CursedPaint._fontFaceCache = {}
 CursedPaint.Font = "FingerPaint"
 CursedPaint.FontFace = nil
+CursedPaint.FontAssetId = "rbxassetid://12187375716"
 CursedPaint.FontFile = "FingerPaint-Regular.ttf"
 CursedPaint.FontFileUrl = "https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/FingerPaint-Regular.ttf"
 CursedPaint._fontStatus = {
@@ -114,6 +115,12 @@ local FONT_NAME_ALIASES = {
 	permanentmarker = { "Permanent Marker", "PermanentMarker" },
 }
 
+local FONT_ASSETS = {
+	fingerpaint = {
+		"rbxassetid://12187375716",
+	},
+}
+
 local FONT_DOWNLOADS = {
 	fingerpaint = {
 		"https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/FingerPaint-Regular.ttf",
@@ -195,6 +202,10 @@ local function fontCandidates(value)
 	end
 
 	local key = fontLookupKey(text)
+	for _, asset in ipairs(FONT_ASSETS[key] or {}) do
+		addFontCandidate(candidates, seen, "path", asset)
+	end
+
 	for _, url in ipairs(FONT_DOWNLOADS[key] or {}) do
 		addFontCandidate(candidates, seen, "download", url)
 	end
@@ -244,7 +255,51 @@ local function fontFromName(name, requested)
 	return nil
 end
 
+local function fontAssetId(value)
+	local text = tostring(value or "")
+	return text:match("^rbxassetid://(%d+)$") or text:match("^(%d+)$")
+end
+
+local function fontFromId(id, requested)
+	local numberId = tonumber(id)
+	if not numberId then
+		return nil
+	end
+
+	local key = "id:" .. tostring(numberId)
+	if CursedPaint._fontFaceCache[key] then
+		setFontStatus(requested, true, "Font.fromId cache", "rbxassetid://" .. tostring(numberId))
+		return CursedPaint._fontFaceCache[key]
+	end
+
+	local ok, face = pcall(function()
+		if not Font or not Font.fromId then
+			return nil
+		end
+
+		if Enum and Enum.FontWeight and Enum.FontStyle then
+			return Font.fromId(numberId, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		end
+
+		return Font.fromId(numberId)
+	end)
+
+	if ok and face then
+		return cacheFontFace(key, requested, "Font.fromId", "rbxassetid://" .. tostring(numberId), face)
+	end
+
+	return nil
+end
+
 local function fontFromPath(path, requested)
+	local id = fontAssetId(path)
+	if id then
+		local face = fontFromId(id, requested)
+		if face then
+			return face
+		end
+	end
+
 	local key = "path:" .. tostring(path)
 	if CursedPaint._fontFaceCache[key] then
 		setFontStatus(requested, true, "Font.new cache", path)
@@ -517,7 +572,7 @@ function CursedPaint:GetFontStatus()
 end
 
 function CursedPaint:GetFontHelp()
-	return "CursedPaint downloads FingerPaint-Regular.ttf from GitHub when writefile/getcustomasset exist. For normal Roblox games, upload the font to Roblox and call Window:SetFont(\"rbxassetid://YOUR_FONT_ASSET_ID\")."
+	return "CursedPaint tries rbxassetid://12187375716 first. If that asset is unavailable, it tries the GitHub TTF when writefile/getcustomasset exist. You can override it with Window:SetFont(\"rbxassetid://YOUR_FONT_ASSET_ID\")."
 end
 
 local function bodyFont()
