@@ -18,10 +18,10 @@ local Window = CursedPaint:CreateWindow({
 
 ```lua
 CursedPaint.Themes.JJS = {
-	Backdrop = Color3.fromRGB(104, 103, 99),
-	Left = Color3.fromRGB(249, 244, 184),
-	Panel = Color3.fromRGB(248, 247, 238),
-	PanelAlt = Color3.fromRGB(220, 219, 208),
+	Backdrop = Color3.fromRGB(132, 132, 126),
+	Left = Color3.fromRGB(244, 241, 178),
+	Panel = Color3.fromRGB(246, 245, 236),
+	PanelAlt = Color3.fromRGB(221, 221, 210),
 	Text = Color3.fromRGB(8, 8, 8),
 	Muted = Color3.fromRGB(34, 34, 34),
 	Ink = Color3.fromRGB(0, 0, 0),
@@ -29,10 +29,11 @@ CursedPaint.Themes.JJS = {
 	SelectedBottom = Color3.fromRGB(210, 89, 52),
 	Bar = Color3.fromRGB(92, 92, 88),
 	BarFill = Color3.fromRGB(10, 204, 245),
-	PanelTransparency = 0.24,
-	RowTransparency = 0.03,
-	Radius = 7,
-	StrokeThickness = 4,
-	ThinStrokeThickness = 3,
+	PanelTransparency = 0.08,
+	ContentTransparency = 0.18,
+	RowTransparency = 0.08,
+	Radius = 4,
+	StrokeThickness = 3,
+	ThinStrokeThickness = 2,
 }
 ```

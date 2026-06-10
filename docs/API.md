@@ -26,6 +26,7 @@ Options:
 - `SidebarWidth`: optional left tab width. Default is `190`.
 - `ContentTop`: optional top content inset. Default reserves space for window buttons.
 - `ContentBottomInset`: optional bottom content inset. Default reserves space for the lower bar.
+- `SideImageWidth`: optional faded art width inside the content panel.
 - `Position`: window position.
 - `Resizable`: set to `false` to hide the resize handle.
 - `Animated`: set to `false` to disable the opening animation for that window.
