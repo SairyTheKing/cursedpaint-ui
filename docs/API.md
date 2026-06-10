@@ -5,127 +5,138 @@
 ```lua
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Paper",
-	Size = UDim2.fromOffset(650, 370),
+	Theme = "Dark",
+	Size = UDim2.fromOffset(690, 395),
+	MinSize = Vector2.new(520, 320),
 	Position = UDim2.fromScale(0.5, 0.5),
+	Resizable = true,
 	BackgroundImage = nil,
-	SideImage = CursedPaint.PlaceholderImage,
+	SideImage = nil,
 	ToggleKey = Enum.KeyCode.RightControl,
 	ConfigFolder = "CursedPaintUI",
+	Font = "FingerPaint",
 })
 ```
 
 Options:
 
-- `Theme`: theme name.
-- `Size`: board size.
-- `Position`: board position.
+- `Theme`: theme name. Default is `Dark`.
+- `Size`: window size.
+- `MinSize`: resize limit as `Vector2` or offset `UDim2`.
+- `Position`: window position.
+- `Resizable`: set to `false` to hide the resize handle.
 - `Title`: optional left-menu title.
 - `BackgroundImage`: optional full-board image.
 - `SideImage`: optional faded image on the content side.
-- `BackgroundImageTransparency`: image transparency.
+- `BackgroundImageTransparency`: background image transparency.
 - `SideImageTransparency`: side image transparency.
 - `ToggleKey`: key that hides/shows the UI.
 - `ConfigFolder`: folder used by `SaveConfig` when file APIs exist.
+- `Font`: font enum or enum name string.
 
-Change images later:
+Aliases:
 
 ```lua
+CursedPaint:New(options)
+Window:AddTab("Main")
+Window:CreateTab("Main")
+```
+
+## Window Methods
+
+```lua
+Window:SetTheme("Paper")
+Window:SetFont("Cartoon")
+Window:SetVisible(true)
+Window:SetMinimized(false)
 Window:SetBackgroundImage("rbxassetid://123456", 0.7)
 Window:SetSideImage("rbxassetid://123456", 0.6)
+Window:Notify({ Title = "Hi", Content = "Loaded." })
+Window:SaveConfig("main")
+Window:LoadConfig("main")
+Window:Destroy()
 ```
+
+## Image Helpers
+
+```lua
+local placeholder = CursedPaint:GetPlaceholderImage()
+local asset = CursedPaint:DownloadImage("https://example.com/image.png", "image.png")
+```
+
+`DownloadImage` requires executor file APIs: `writefile` and `getcustomasset`. Roblox asset IDs such as `123456` and `rbxassetid://123456` work directly.
 
 ## Tabs
 
 ```lua
-local Daily = Window:CreateTab("Daily")
 local Main = Window:AddTab("Main")
 ```
 
-Tabs appear on the left side as vertical text buttons.
-
-`AddTab` and `CreateTab` are the same.
-
-## Section
+Controls can also use the `Add` prefix:
 
 ```lua
-Daily:Section("Daily")
+Main:AddButton({ Title = "Run" })
+Main:Button({ Title = "Run" })
 ```
 
-## Label
+## Text
 
 ```lua
-local Label = Daily:Label("Refreshes in: 7h 29m 23s")
-Label:Set("Refreshes in: 1h 10m 02s")
-```
+Main:AddSection("General")
 
-## Paragraph
+local Label = Main:AddLabel("Ready.")
+Label:Set("Running.")
 
-```lua
-Daily:Paragraph({
+Main:AddParagraph({
 	Title = "Info",
 	Content = "Longer text goes here.",
 })
+
+Main:AddDivider("Group")
+Main:AddSpace(8)
 ```
 
-## Image
+## Images
 
 ```lua
-Daily:Image({
-	Title = "Image Row",
-	Caption = "Use any Roblox image asset.",
+Main:AddImage({
+	Title = "Preview",
+	Caption = "Image row.",
 	Image = "rbxassetid://123456",
 	Height = 120,
-	ImageTransparency = 0.1,
 })
-```
 
-## Banner
-
-```lua
-Daily:Banner({
+Main:AddBanner({
 	Title = "Banner",
-	Image = CursedPaint.PlaceholderImage,
+	Image = CursedPaint:GetPlaceholderImage(),
 })
 ```
 
-## Quest
+## Progress And Quests
 
 ```lua
-local Quest = Daily:Quest({
-	Title = "Roll 15 times",
-	Value = 0,
-	Max = 15,
-	Image = "rbxassetid://123456",
-	ImageTransparency = 0.7,
-})
-
-Quest:Set(8, 15)
-```
-
-This creates a large row with:
-
-- title
-- `value/max` counter
-- progress bar
-
-## Progress
-
-```lua
-local Total = Daily:Progress({
+local Progress = Main:AddProgress({
 	Title = "Total Progress",
 	Value = 50,
 	Max = 100,
 })
+Progress:Set(75)
 
-Total:Set(75)
+local Quest = Main:AddQuest({
+	Title = "Roll 15 times",
+	Value = 0,
+	Max = 15,
+	Image = "rbxassetid://123456",
+})
+Quest:Set(8, 15)
 ```
 
 ## Button
 
 ```lua
-Daily:Button({
+Main:AddButton({
 	Title = "Claim Reward",
+	Description = "Runs a callback.",
 	ButtonText = "CLAIM",
 	Icon = "rbxassetid://123456",
 	Callback = function()
@@ -137,7 +148,7 @@ Daily:Button({
 ## Toggle
 
 ```lua
-local Toggle = Daily:Toggle({
+local Toggle = Main:AddToggle({
 	Title = "Auto Sprint",
 	Flag = "auto_sprint",
 	Default = true,
@@ -153,16 +164,13 @@ print(Toggle:Get())
 ## Slider
 
 ```lua
-local Slider = Daily:Slider({
+local Slider = Main:AddSlider({
 	Title = "Volume",
 	Flag = "volume",
 	Min = 0,
 	Max = 100,
 	Step = 5,
 	Default = 50,
-	Callback = function(value)
-		print(value)
-	end,
 })
 
 Slider:Set(80)
@@ -171,48 +179,35 @@ Slider:Set(80)
 ## Stepper
 
 ```lua
-local Stepper = Daily:Stepper({
+local Stepper = Main:AddStepper({
 	Title = "Combo Limit",
 	Flag = "combo_limit",
 	Min = 1,
 	Max = 10,
 	Step = 1,
 	Default = 4,
-	Callback = function(value)
-		print(value)
-	end,
 })
 
 Stepper:Set(6)
 ```
 
-## Dropdown
+## Dropdowns
 
 ```lua
-local Dropdown = Daily:Dropdown({
+local Dropdown = Main:AddDropdown({
 	Title = "Mode",
 	Flag = "mode",
 	Options = { "Casual", "Ranked", "Private" },
 	Default = "Casual",
-	Callback = function(value)
-		print(value)
-	end,
 })
 
 Dropdown:Set("Ranked")
-```
 
-## MultiDropdown
-
-```lua
-local Multi = Daily:MultiDropdown({
-	Title = "Enabled Moves",
+local Multi = Main:AddMultiDropdown({
+	Title = "Moves",
 	Flag = "moves",
 	Options = { "M1", "Special", "Ultimate", "Dash" },
 	Default = { "M1", "Dash" },
-	Callback = function(values)
-		print(#values)
-	end,
 })
 
 Multi:Set({ "Special", "Ultimate" })
@@ -221,101 +216,48 @@ Multi:Set({ "Special", "Ultimate" })
 ## Textbox
 
 ```lua
-Daily:Textbox({
+Main:AddTextbox({
 	Title = "Shout",
 	Flag = "shout",
 	Placeholder = "type here",
 	Default = "hello",
+	SubmitOnly = true,
 	Callback = function(text)
 		print(text)
 	end,
 })
 ```
 
-By default, textbox callbacks run when enter is pressed.
-
-Use `SubmitOnly = false` if you want focus loss to submit too.
-
 ## Keybind
 
 ```lua
-Daily:Keybind({
-	Title = "Toggle UI",
-	Flag = "toggle_ui",
-	Default = Enum.KeyCode.RightControl,
+Main:AddKeybind({
+	Title = "Notify Key",
+	Flag = "notify_key",
+	Default = Enum.KeyCode.RightShift,
 	Pressed = function(key)
-		print("pressed", key.Name)
+		print(key.Name)
 	end,
 })
 ```
 
-## ColorPicker
+## Color Picker
 
 ```lua
-Daily:ColorPicker({
-	Title = "Bar Color",
-	Flag = "bar_color",
-	Default = Color3.fromRGB(21, 205, 244),
+Main:AddColorPicker({
+	Title = "Accent",
+	Flag = "accent",
+	Default = Color3.fromRGB(26, 203, 246),
 	Callback = function(color)
 		print(color)
 	end,
 })
 ```
 
-Saved color flags use hex text like `#15CDF4`.
-
 ## Theme Dropdown
 
 ```lua
-Daily:ThemeDropdown("Theme")
+Main:AddThemeDropdown("Theme")
 ```
 
-## Notifications
-
-```lua
-Window:Notify({
-	Title = "Loaded",
-	Content = "Quest menu loaded.",
-	Duration = 3,
-})
-```
-
-## Themes
-
-```lua
-Window:SetTheme("Blood")
-local names = Window:GetThemes()
-```
-
-## Config
-
-```lua
-Window:SaveConfig("default")
-Window:LoadConfig("default")
-```
-
-Every control with `Flag` saves its value in:
-
-```lua
-Window.Flags
-```
-
-## Cleanup
-
-```lua
-Window:Destroy()
-```
-
-## Add Aliases
-
-Every control also has an `Add...` alias:
-
-```lua
-Tab:AddImage(...)
-Tab:AddBanner(...)
-Tab:AddButton(...)
-Tab:AddToggle(...)
-Tab:AddSlider(...)
-Tab:AddDropdown(...)
-Tab:AddMultiDropdown(...)
-```
+This creates a dropdown that calls `Window:SetTheme`.

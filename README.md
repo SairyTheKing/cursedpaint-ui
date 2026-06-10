@@ -1,16 +1,24 @@
 # CursedPaint UI
 
-CursedPaint UI is a Roblox Luau UI library for testing panels, quest menus, and showcase scripts.
+[API docs](docs/API.md) | [Themes](docs/THEMES.md) | [Showcase](examples/showcase.client.lua)
 
-The default style is a flat translucent paper menu with black sketch borders, left-side text tabs, FingerPaint text, and cyan progress bars. It is made to feel closer to a goofy Roblox fighting-game menu while staying original and asset-free.
+CursedPaint UI is a simple Roblox Luau UI library for testing panels, script menus, settings pages, and showcase interfaces.
+
+It uses a dark rounded sketch style by default, with FingerPaint-style text when Roblox supports it. The goal is quick setup, readable code, and enough controls to build a real panel without fighting the API.
 
 ## Load
+
+```lua
+local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/loader.lua"))()
+```
+
+Direct source load:
 
 ```lua
 local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/Source.lua"))()
 ```
 
-Or put `Source.lua` into Roblox Studio as a ModuleScript:
+Roblox Studio ModuleScript:
 
 ```lua
 local CursedPaint = require(path.to.Source)
@@ -21,18 +29,13 @@ local CursedPaint = require(path.to.Source)
 ```lua
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Paper",
-	Size = UDim2.fromOffset(650, 370),
-	SideImage = CursedPaint.PlaceholderImage,
+	Theme = "Dark",
+	Size = UDim2.fromOffset(690, 395),
+	Resizable = true,
 	ToggleKey = Enum.KeyCode.RightControl,
 })
 
 local Main = Window:AddTab("Main")
-
-Main:AddBanner({
-	Title = "Paper Menu Library",
-	Image = CursedPaint.PlaceholderImage,
-})
 
 Main:AddToggle({
 	Title = "Auto Sprint",
@@ -45,80 +48,43 @@ Main:AddSlider({
 	Flag = "walk_speed",
 	Min = 16,
 	Max = 100,
-	Step = 1,
 	Default = 24,
 })
 ```
 
-Full example: [showcase.client.lua](examples/showcase.client.lua)
-
 ## Features
 
-- FingerPaint-style text with fallback font.
-- Translucent paper board layout.
-- Left-side vertical tabs.
-- Optional background and side images.
-- Image rows, banners, quest art, and small row icons.
-- Draggable window.
-- Minimize, close, and toggle key.
-- Quest rows with counters and bars.
+- Dark rounded default theme, plus `Paper`, `Smoke`, `Blood`, `Void`, `Forest`, and `Candy`.
+- Draggable, minimizable, closable, toggleable, and resizable window.
+- Tabs, sections, labels, paragraphs, images, banners, quests, and progress bars.
 - Buttons, toggles, sliders, steppers, dropdowns, multi-dropdowns, textboxes, keybinds, and color pickers.
-- Notifications.
+- Notifications and theme switching.
 - Config save/load with `writefile` when available and memory fallback otherwise.
-- Themes: `Paper`, `Smoke`, `Blood`, `Void`, `Forest`, `Candy`.
+- Image helpers for Roblox asset IDs and HTTP images when executor file APIs exist.
 
-Controls:
+## Images
 
-- `Section`
-- `Label`
-- `Paragraph`
-- `Image`
-- `Banner`
-- `Quest`
-- `Progress`
-- `Button`
-- `Toggle`
-- `Slider`
-- `Stepper`
-- `Dropdown`
-- `MultiDropdown`
-- `Textbox`
-- `Keybind`
-- `ColorPicker`
-- `ThemeDropdown`
+Use normal Roblox assets when possible:
+
+```lua
+Window:SetSideImage("rbxassetid://123456789", 0.65)
+```
+
+HTTP images need executor support for `writefile` and `getcustomasset`:
+
+```lua
+local image = CursedPaint:DownloadImage("https://example.com/image.png")
+Window:SetBackgroundImage(image, 0.75)
+```
 
 ## Config
 
-Controls with a `Flag` are stored in:
-
 ```lua
-Window.Flags
+Window:SaveConfig("main")
+Window:LoadConfig("main")
 ```
 
-Save:
-
-```lua
-Window:SaveConfig("showcase")
-```
-
-Load:
-
-```lua
-Window:LoadConfig("showcase")
-```
-
-If file APIs are available, config goes to:
-
-```txt
-CursedPaintUI/showcase.json
-```
-
-If file APIs are not available, config is kept in memory for the current session.
-
-## Docs
-
-- [API](docs/API.md)
-- [Themes](docs/THEMES.md)
+Controls with a `Flag` are saved into `Window.Flags`.
 
 ## Note
 

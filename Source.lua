@@ -3,10 +3,30 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.4.0"
-CursedPaint.PlaceholderImage = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+CursedPaint.Version = "0.5.0"
+CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
+CursedPaint._imageCache = {}
 
 CursedPaint.Themes = {
+	Dark = {
+		Backdrop = Color3.fromRGB(11, 12, 16),
+		Left = Color3.fromRGB(17, 19, 26),
+		Panel = Color3.fromRGB(27, 29, 38),
+		PanelAlt = Color3.fromRGB(37, 40, 51),
+		Text = Color3.fromRGB(246, 241, 232),
+		Muted = Color3.fromRGB(170, 164, 154),
+		Ink = Color3.fromRGB(2, 3, 6),
+		SelectedTop = Color3.fromRGB(74, 79, 102),
+		SelectedBottom = Color3.fromRGB(132, 82, 126),
+		Bar = Color3.fromRGB(57, 62, 78),
+		BarFill = Color3.fromRGB(26, 203, 246),
+		Good = Color3.fromRGB(76, 220, 128),
+		Bad = Color3.fromRGB(238, 81, 90),
+		PanelTransparency = 0.02,
+		RowTransparency = 0.04,
+		Radius = 10,
+		StrokeThickness = 1.4,
+	},
 	Paper = {
 		Backdrop = Color3.fromRGB(226, 224, 215),
 		Left = Color3.fromRGB(238, 235, 204),
@@ -141,7 +161,7 @@ local function cloneTheme(theme)
 end
 
 local function getTheme(name)
-	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.Paper)
+	return cloneTheme(CursedPaint.Themes[name] or CursedPaint.Themes.Dark or CursedPaint.Themes.Paper)
 end
 
 local function themeNames()
@@ -153,7 +173,30 @@ local function themeNames()
 	return names
 end
 
+local function resolveEnumFont(value)
+	if kindOf(value) == "EnumItem" then
+		return value
+	end
+
+	if type(value) == "string" then
+		local ok, font = pcall(function()
+			return Enum.Font[value]
+		end)
+
+		if ok and font then
+			return font
+		end
+	end
+
+	return nil
+end
+
 local function handFont()
+	local configured = resolveEnumFont(CursedPaint.Font)
+	if configured then
+		return configured
+	end
+
 	local ok, font = pcall(function()
 		return Enum.Font.FingerPaint
 	end)
@@ -174,10 +217,22 @@ local function handFont()
 end
 
 local function applyHandFont(instance)
-	instance.Font = handFont()
+	local font = handFont()
+	instance.Font = font
+
+	if CursedPaint.FontFace then
+		local ok = pcall(function()
+			instance.FontFace = CursedPaint.FontFace
+		end)
+
+		if ok then
+			return
+		end
+	end
+
 	pcall(function()
-		if Font then
-			instance.FontFace = Font.new("rbxasset://fonts/families/FingerPaint.json")
+		if Font and Font.fromEnum then
+			instance.FontFace = Font.fromEnum(font)
 		end
 	end)
 end
@@ -209,8 +264,26 @@ end
 local function stroke(parent, theme, thickness)
 	return make("UIStroke", {
 		Color = theme.Ink,
-		Thickness = thickness or 2,
+		Thickness = thickness or theme.StrokeThickness or 2,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Parent = parent,
+	})
+end
+
+local function cornerRadius(theme, radius)
+	local resolved = radius
+	if resolved == nil and theme then
+		resolved = theme.Radius
+	end
+	if resolved == nil then
+		resolved = 7
+	end
+	return UDim.new(0, resolved)
+end
+
+local function corner(parent, theme, radius)
+	return make("UICorner", {
+		CornerRadius = cornerRadius(theme, radius),
 		Parent = parent,
 	})
 end
@@ -357,6 +430,93 @@ local function updateStroke(parent, theme)
 	end
 end
 
+local function updateCorner(parent, theme, radius)
+	local rounded = parent:FindFirstChildOfClass("UICorner")
+	if rounded then
+		rounded.CornerRadius = cornerRadius(theme, radius)
+	end
+end
+
+local PLACEHOLDER_PNG =
+	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII="
+
+local function base64Decode(data)
+	local alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+	data = tostring(data or ""):gsub("[^" .. alphabet .. "=]", "")
+
+	return (data:gsub(".", function(char)
+		if char == "=" then
+			return ""
+		end
+
+		local bits = ""
+		local value = alphabet:find(char, 1, true) - 1
+		for index = 6, 1, -1 do
+			bits = bits .. (value % (2 ^ index) - value % (2 ^ (index - 1)) > 0 and "1" or "0")
+		end
+		return bits
+	end):gsub("%d%d%d?%d?%d?%d?%d?%d?", function(bits)
+		if #bits ~= 8 then
+			return ""
+		end
+
+		local byte = 0
+		for index = 1, 8 do
+			if bits:sub(index, index) == "1" then
+				byte = byte + 2 ^ (8 - index)
+			end
+		end
+
+		return string.char(byte)
+	end))
+end
+
+local function ensureAssetFolder()
+	pcall(function()
+		if makefolder and (not isfolder or not isfolder("CursedPaintUI")) then
+			makefolder("CursedPaintUI")
+		end
+	end)
+
+	pcall(function()
+		if makefolder and (not isfolder or not isfolder("CursedPaintUI/assets")) then
+			makefolder("CursedPaintUI/assets")
+		end
+	end)
+end
+
+local function customAssetFromBytes(fileName, bytes)
+	local ok, asset = pcall(function()
+		if not writefile or not getcustomasset then
+			return nil
+		end
+
+		ensureAssetFolder()
+		local safeName = tostring(fileName or "image.png"):gsub("[^%w%._%-]", "_")
+		local path = "CursedPaintUI/assets/" .. safeName
+		writefile(path, bytes)
+		return getcustomasset(path)
+	end)
+
+	if ok then
+		return asset
+	end
+
+	return nil
+end
+
+local function placeholderImage()
+	if CursedPaint._imageCache.placeholder then
+		return CursedPaint._imageCache.placeholder
+	end
+
+	local asset = customAssetFromBytes("placeholder.png", base64Decode(PLACEHOLDER_PNG))
+		or "rbxasset://textures/ui/GuiImagePlaceholder.png"
+
+	CursedPaint._imageCache.placeholder = asset
+	return asset
+end
+
 local function normalizeImage(image)
 	if image == nil or image == "" then
 		return nil
@@ -369,6 +529,14 @@ local function normalizeImage(image)
 	local text = tostring(image)
 	if text:match("^%d+$") then
 		return "rbxassetid://" .. text
+	end
+
+	if text == CursedPaint.PlaceholderImage or text:lower() == "placeholder" then
+		return placeholderImage()
+	end
+
+	if text:match("^https?://") then
+		return CursedPaint:DownloadImage(text)
 	end
 
 	return text
@@ -404,6 +572,7 @@ local function makeButton(parent, text, theme, width)
 		Parent = parent,
 	})
 	applyHandFont(button)
+	corner(button, theme)
 	stroke(button, theme, 2)
 
 	button.MouseEnter:Connect(function()
@@ -427,6 +596,7 @@ local function createProgressBar(parent, theme, yOffset)
 		Size = UDim2.new(1, -16, 0, 13),
 		Parent = parent,
 	})
+	corner(track, theme, 5)
 	stroke(track, theme, 1)
 
 	local fill = make("Frame", {
@@ -435,6 +605,7 @@ local function createProgressBar(parent, theme, yOffset)
 		Size = UDim2.fromScale(0, 1),
 		Parent = track,
 	})
+	corner(fill, theme, 5)
 
 	return track, fill
 end
@@ -455,7 +626,14 @@ end
 function CursedPaint:CreateWindow(options)
 	options = options or {}
 
-	local themeName = options.Theme or "Paper"
+	if options.Font then
+		CursedPaint.Font = resolveEnumFont(options.Font) or options.Font
+	end
+	if options.FontFace then
+		CursedPaint.FontFace = options.FontFace
+	end
+
+	local themeName = options.Theme or "Dark"
 	local theme = getTheme(themeName)
 	local parent = options.Parent or resolveParent()
 	assert(parent, "CursedPaint UI could not find a UI parent.")
@@ -476,10 +654,11 @@ function CursedPaint:CreateWindow(options)
 		BackgroundTransparency = theme.PanelTransparency,
 		BorderSizePixel = 0,
 		Position = options.Position or UDim2.fromScale(0.5, 0.5),
-		Size = options.Size or UDim2.fromOffset(650, 370),
+		Size = options.Size or UDim2.fromOffset(690, 395),
 		ZIndex = 1,
 		Parent = gui,
 	})
+	corner(root, theme)
 	stroke(root, theme, 2)
 
 	local texture = make("Frame", {
@@ -491,6 +670,7 @@ function CursedPaint:CreateWindow(options)
 		ZIndex = 1,
 		Parent = root,
 	})
+	corner(texture, theme, math.max((theme.Radius or 7) - 3, 2))
 	stroke(texture, theme, 1)
 
 	local backgroundImage = imageLabel(root, options.BackgroundImage, {
@@ -500,6 +680,9 @@ function CursedPaint:CreateWindow(options)
 		Size = UDim2.new(1, -8, 1, -8),
 		ZIndex = 2,
 	})
+	if backgroundImage then
+		corner(backgroundImage, theme, math.max((theme.Radius or 7) - 3, 2))
+	end
 
 	local left = make("Frame", {
 		BackgroundColor3 = theme.Left,
@@ -510,6 +693,7 @@ function CursedPaint:CreateWindow(options)
 		ZIndex = 3,
 		Parent = root,
 	})
+	corner(left, theme, math.max((theme.Radius or 7) - 2, 2))
 	stroke(left, theme, 1)
 
 	local titleLabel
@@ -559,6 +743,9 @@ function CursedPaint:CreateWindow(options)
 		Size = UDim2.new(0, options.SideImageWidth or 155, 1, 0),
 		ZIndex = 3,
 	})
+	if sideImage then
+		corner(sideImage, theme, math.max((theme.Radius or 7) - 2, 2))
+	end
 
 	local bottomStrip = make("Frame", {
 		BackgroundColor3 = theme.Bar,
@@ -569,6 +756,7 @@ function CursedPaint:CreateWindow(options)
 		ZIndex = 2,
 		Parent = root,
 	})
+	corner(bottomStrip, theme, 5)
 	stroke(bottomStrip, theme, 1)
 
 	local close = makeButton(root, "X", theme, 28)
@@ -579,6 +767,16 @@ function CursedPaint:CreateWindow(options)
 	minimize.Position = UDim2.new(1, -72, 0, 10)
 	minimize.ZIndex = 20
 
+	local resizeGrip
+	if options.Resizable ~= false then
+		resizeGrip = makeButton(root, "///", theme, 42)
+		resizeGrip.AnchorPoint = Vector2.new(1, 1)
+		resizeGrip.Position = UDim2.new(1, -9, 1, -9)
+		resizeGrip.Size = UDim2.fromOffset(42, 24)
+		resizeGrip.TextSize = 13
+		resizeGrip.ZIndex = 20
+	end
+
 	local toastHolder = make("Frame", {
 		BackgroundTransparency = 1,
 		Position = UDim2.new(1, -330, 0, 16),
@@ -587,6 +785,11 @@ function CursedPaint:CreateWindow(options)
 	})
 	local toastLayout = list(toastHolder, 8)
 	toastLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+	local minSize = options.MinSize or Vector2.new(480, 300)
+	if kindOf(minSize) == "UDim2" then
+		minSize = Vector2.new(minSize.X.Offset, minSize.Y.Offset)
+	end
 
 	local self = setmetatable({
 		ScreenGui = gui,
@@ -599,6 +802,7 @@ function CursedPaint:CreateWindow(options)
 		Content = content,
 		SideImage = sideImage,
 		BottomStrip = bottomStrip,
+		ResizeGrip = resizeGrip,
 		ToastHolder = toastHolder,
 		ThemeName = themeName,
 		Theme = theme,
@@ -611,6 +815,7 @@ function CursedPaint:CreateWindow(options)
 		_visible = true,
 		_minimized = false,
 		_normalSize = root.Size,
+		_minSize = minSize,
 		_configFolder = options.ConfigFolder or "CursedPaintUI",
 	}, Window)
 
@@ -620,10 +825,14 @@ function CursedPaint:CreateWindow(options)
 		texture.BackgroundTransparency = 0.86
 		if backgroundImage then
 			backgroundImage.ImageTransparency = options.BackgroundImageTransparency or 0.72
+			updateCorner(backgroundImage, nextTheme, math.max((nextTheme.Radius or 7) - 3, 2))
 		end
 		left.BackgroundColor3 = nextTheme.Left
 		if titleLabel then
 			titleLabel.TextColor3 = nextTheme.Text
+		end
+		if sideImage then
+			updateCorner(sideImage, nextTheme, math.max((nextTheme.Radius or 7) - 2, 2))
 		end
 		tabs.ScrollBarImageColor3 = nextTheme.Ink
 		bottomStrip.BackgroundColor3 = nextTheme.Bar
@@ -633,12 +842,25 @@ function CursedPaint:CreateWindow(options)
 		minimize.BackgroundColor3 = nextTheme.Panel
 		minimize.BackgroundTransparency = nextTheme.RowTransparency
 		minimize.TextColor3 = nextTheme.Text
+		if resizeGrip then
+			resizeGrip.BackgroundColor3 = nextTheme.Panel
+			resizeGrip.BackgroundTransparency = nextTheme.RowTransparency
+			resizeGrip.TextColor3 = nextTheme.Text
+			updateStroke(resizeGrip, nextTheme)
+			updateCorner(resizeGrip, nextTheme)
+		end
 		updateStroke(root, nextTheme)
 		updateStroke(texture, nextTheme)
 		updateStroke(left, nextTheme)
 		updateStroke(bottomStrip, nextTheme)
 		updateStroke(close, nextTheme)
 		updateStroke(minimize, nextTheme)
+		updateCorner(root, nextTheme)
+		updateCorner(texture, nextTheme, math.max((nextTheme.Radius or 7) - 3, 2))
+		updateCorner(left, nextTheme, math.max((nextTheme.Radius or 7) - 2, 2))
+		updateCorner(bottomStrip, nextTheme, 5)
+		updateCorner(close, nextTheme)
+		updateCorner(minimize, nextTheme)
 	end)
 
 	close.MouseButton1Click:Connect(function()
@@ -650,6 +872,9 @@ function CursedPaint:CreateWindow(options)
 	end)
 
 	self:_makeDraggable(root, root)
+	if resizeGrip then
+		self:_makeResizable(resizeGrip, root, self._minSize)
+	end
 
 	local userInput = service("UserInputService")
 	if options.ToggleKey then
@@ -686,6 +911,68 @@ function Window:SetTheme(name)
 	return true
 end
 
+function CursedPaint:SetFont(font, fontFace)
+	CursedPaint.Font = resolveEnumFont(font) or font
+	CursedPaint.FontFace = fontFace
+	return CursedPaint.Font
+end
+
+function Window:SetFont(font, fontFace)
+	CursedPaint:SetFont(font, fontFace)
+
+	for _, descendant in ipairs(self.ScreenGui:GetDescendants()) do
+		if descendant:IsA("TextLabel") or descendant:IsA("TextButton") or descendant:IsA("TextBox") then
+			applyHandFont(descendant)
+		end
+	end
+
+	return true
+end
+
+function CursedPaint:GetPlaceholderImage()
+	return placeholderImage()
+end
+
+function CursedPaint:DownloadImage(url, fileName)
+	local text = tostring(url or "")
+	if not text:match("^https?://") then
+		return normalizeImage(url)
+	end
+
+	if CursedPaint._imageCache[text] then
+		return CursedPaint._imageCache[text]
+	end
+
+	local ok, asset = pcall(function()
+		if not writefile or not getcustomasset then
+			return nil
+		end
+
+		ensureAssetFolder()
+		local data = game:HttpGet(text)
+		if not data or data == "" then
+			return nil
+		end
+
+		local safeName = tostring(fileName or text:match("([^/%?#]+)[%?#]?$") or "download.png")
+		safeName = safeName:gsub("[^%w%._%-]", "_")
+		if not safeName:match("%.%w+$") then
+			safeName = safeName .. ".png"
+		end
+
+		local path = "CursedPaintUI/assets/" .. safeName
+		writefile(path, data)
+		return getcustomasset(path)
+	end)
+
+	if ok and asset then
+		CursedPaint._imageCache[text] = asset
+		return asset
+	end
+
+	return nil
+end
+
 function Window:SetBackgroundImage(image, transparency)
 	local normalized = normalizeImage(image)
 	if not normalized then
@@ -704,6 +991,9 @@ function Window:SetBackgroundImage(image, transparency)
 			Size = UDim2.new(1, -8, 1, -8),
 			ZIndex = 2,
 		})
+		if self.BackgroundImage then
+			corner(self.BackgroundImage, self.Theme, math.max((self.Theme.Radius or 7) - 3, 2))
+		end
 	else
 		self.BackgroundImage.Image = normalized
 		self.BackgroundImage.ImageTransparency = transparency or self.BackgroundImage.ImageTransparency
@@ -731,6 +1021,9 @@ function Window:SetSideImage(image, transparency)
 			Size = UDim2.new(0, 155, 1, 0),
 			ZIndex = 3,
 		})
+		if self.SideImage then
+			corner(self.SideImage, self.Theme, math.max((self.Theme.Radius or 7) - 2, 2))
+		end
 	else
 		self.SideImage.Image = normalized
 		self.SideImage.ImageTransparency = transparency or self.SideImage.ImageTransparency
@@ -753,10 +1046,16 @@ function Window:SetMinimized(minimized)
 	if self._minimized then
 		self.Left.Visible = false
 		self.Content.Visible = false
+		if self.ResizeGrip then
+			self.ResizeGrip.Visible = false
+		end
 		tween(self.Root, 0.14, { Size = UDim2.fromOffset(140, 42) })
 	else
 		self.Left.Visible = true
 		self.Content.Visible = true
+		if self.ResizeGrip then
+			self.ResizeGrip.Visible = true
+		end
 		tween(self.Root, 0.14, { Size = self._normalSize })
 	end
 end
@@ -799,6 +1098,40 @@ function Window:_makeDraggable(handle, target)
 	end)
 end
 
+function Window:_makeResizable(handle, target, minSize)
+	local userInput = service("UserInputService")
+	local resizing = false
+	local resizeStart
+	local startSize
+	minSize = minSize or Vector2.new(480, 300)
+
+	handle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			resizing = true
+			resizeStart = input.Position
+			startSize = target.Size
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					resizing = false
+				end
+			end)
+		end
+	end)
+
+	userInput.InputChanged:Connect(function(input)
+		if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - resizeStart
+			local startWidth = startSize.X.Offset ~= 0 and startSize.X.Offset or target.AbsoluteSize.X
+			local startHeight = startSize.Y.Offset ~= 0 and startSize.Y.Offset or target.AbsoluteSize.Y
+			local nextWidth = math.max(minSize.X, startWidth + delta.X)
+			local nextHeight = math.max(minSize.Y, startHeight + delta.Y)
+			local nextSize = UDim2.fromOffset(nextWidth, nextHeight)
+			target.Size = nextSize
+			self._normalSize = nextSize
+		end
+	end)
+end
+
 function Window:CreateTab(title, icon)
 	local theme = self.Theme
 
@@ -829,6 +1162,7 @@ function Window:CreateTab(title, icon)
 		Parent = self.TabsBar,
 	})
 	applyHandFont(button)
+	corner(button, theme, 6)
 	stroke(button, theme, 1)
 
 	local gradient = make("UIGradient", {
@@ -858,6 +1192,7 @@ function Window:CreateTab(title, icon)
 		button.TextColor3 = nextTheme.Text
 		button.BackgroundColor3 = nextTheme.Left
 		updateStroke(button, nextTheme)
+		updateCorner(button, nextTheme, 6)
 		gradient.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, nextTheme.SelectedTop),
 			ColorSequenceKeypoint.new(1, nextTheme.SelectedBottom),
@@ -909,6 +1244,7 @@ function Window:Notify(options)
 		Size = UDim2.fromOffset(310, 76),
 		Parent = self.ToastHolder,
 	})
+	corner(toast, theme)
 	stroke(toast, theme, 2)
 	padding(toast, 9, 5, 9, 5)
 
@@ -1032,12 +1368,14 @@ function Tab:_row(height)
 		Size = UDim2.new(1, 0, 0, height or 58),
 		Parent = self.Page,
 	})
+	corner(row, theme)
 	stroke(row, theme, 2)
 
 	self.Window:_bindTheme(function(nextTheme)
 		row.BackgroundColor3 = nextTheme.Panel
 		row.BackgroundTransparency = nextTheme.RowTransparency
 		updateStroke(row, nextTheme)
+		updateCorner(row, nextTheme)
 	end)
 
 	return row
@@ -1116,6 +1454,8 @@ function Tab:Divider(text)
 			Parent = row,
 		})
 		setHandText(label, 16)
+		corner(label, theme, 6)
+		stroke(label, theme, 1)
 	end
 
 	self.Window:_bindTheme(function(nextTheme)
@@ -1123,6 +1463,8 @@ function Tab:Divider(text)
 		if label then
 			label.BackgroundColor3 = nextTheme.Panel
 			label.TextColor3 = nextTheme.Text
+			updateStroke(label, nextTheme)
+			updateCorner(label, nextTheme, 6)
 		end
 	end)
 
@@ -1184,6 +1526,9 @@ function Tab:Image(options)
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 2,
 	})
+	if image then
+		corner(image, theme)
+	end
 
 	local shade = make("Frame", {
 		BackgroundColor3 = theme.Panel,
@@ -1227,6 +1572,9 @@ function Tab:Image(options)
 
 	self.Window:_bindTheme(function(nextTheme)
 		shade.BackgroundColor3 = nextTheme.Panel
+		if image then
+			updateCorner(image, nextTheme)
+		end
 		if title then
 			title.TextColor3 = nextTheme.Text
 		end
@@ -1238,7 +1586,7 @@ function Tab:Image(options)
 	return {
 		Set = function(_, nextImage)
 			if image then
-				image.Image = normalizeImage(nextImage) or CursedPaint.PlaceholderImage
+				image.Image = normalizeImage(nextImage) or placeholderImage()
 			end
 		end,
 		Instance = row,
@@ -1266,6 +1614,9 @@ function Tab:Quest(options)
 		Size = UDim2.fromOffset(options.ImageWidth or 150, (options.Height or 82) - 4),
 		ZIndex = 2,
 	})
+	if art then
+		corner(art, theme, math.max((theme.Radius or 7) - 2, 2))
+	end
 	local title = rowTitle(row, options.Title or "Quest", theme, 2, art and 168 or 16)
 	title.ZIndex = 4
 	local counter = make("TextLabel", {
@@ -1300,6 +1651,7 @@ function Tab:Quest(options)
 		fill.BackgroundColor3 = nextTheme.BarFill
 		if art then
 			art.ImageTransparency = options.ImageTransparency or 0.55
+			updateCorner(art, nextTheme, math.max((nextTheme.Radius or 7) - 2, 2))
 		end
 		updateStroke(track, nextTheme)
 	end)
@@ -1601,6 +1953,7 @@ function Tab:Stepper(options)
 		Parent = row,
 	})
 	applyHandFont(valueLabel)
+	corner(valueLabel, theme)
 	stroke(valueLabel, theme, 1)
 
 	local plus = makeButton(row, "+", theme, 32)
@@ -1638,6 +1991,7 @@ function Tab:Stepper(options)
 		updateStroke(minus, nextTheme)
 		updateStroke(valueLabel, nextTheme)
 		updateStroke(plus, nextTheme)
+		updateCorner(valueLabel, nextTheme)
 	end)
 
 	return {
@@ -1677,6 +2031,7 @@ function Tab:Dropdown(options)
 		ZIndex = 10,
 		Parent = row,
 	})
+	corner(menu, theme)
 	stroke(menu, theme, 2)
 	local menuLayout = list(menu, 0)
 
@@ -1733,6 +2088,7 @@ function Tab:Dropdown(options)
 		menu.BackgroundColor3 = nextTheme.Panel
 		updateStroke(button, nextTheme)
 		updateStroke(menu, nextTheme)
+		updateCorner(menu, nextTheme)
 		for _, child in ipairs(menu:GetChildren()) do
 			if child:IsA("TextButton") then
 				child.TextColor3 = nextTheme.Text
@@ -1778,6 +2134,7 @@ function Tab:MultiDropdown(options)
 		ZIndex = 10,
 		Parent = row,
 	})
+	corner(menu, theme)
 	stroke(menu, theme, 2)
 	list(menu, 0)
 
@@ -1878,6 +2235,7 @@ function Tab:MultiDropdown(options)
 		menu.BackgroundColor3 = nextTheme.Panel
 		updateStroke(button, nextTheme)
 		updateStroke(menu, nextTheme)
+		updateCorner(menu, nextTheme)
 		for _, option in pairs(optionButtons) do
 			option.BackgroundColor3 = nextTheme.Panel
 			option.TextColor3 = nextTheme.Text
@@ -1919,6 +2277,7 @@ function Tab:Textbox(options)
 		Size = UDim2.fromOffset(154, 30),
 		Parent = row,
 	})
+	corner(box, theme)
 	stroke(box, theme, 1)
 
 	local function set(nextValue, silent)
@@ -1944,6 +2303,7 @@ function Tab:Textbox(options)
 		box.TextColor3 = nextTheme.Text
 		box.PlaceholderColor3 = nextTheme.Muted
 		updateStroke(box, nextTheme)
+		updateCorner(box, nextTheme)
 	end)
 
 	return {
@@ -2074,6 +2434,7 @@ function Tab:ColorPicker(options)
 			Text = "",
 			Parent = holder,
 		})
+		corner(swatch, theme, 5)
 		stroke(swatch, theme, 1)
 		swatches[swatch] = color
 		swatch.MouseButton1Click:Connect(function()
@@ -2088,6 +2449,7 @@ function Tab:ColorPicker(options)
 		title.TextColor3 = nextTheme.Text
 		for swatch in pairs(swatches) do
 			updateStroke(swatch, nextTheme)
+			updateCorner(swatch, nextTheme, 5)
 		end
 	end)
 

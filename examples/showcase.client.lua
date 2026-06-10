@@ -1,14 +1,16 @@
 -- CursedPaint UI showcase
--- Paste into a LocalScript, or run through your testing environment.
+-- Paste into a LocalScript or run through an executor with HttpGet enabled.
 
-local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/Source.lua"))()
-local PlaceholderImage = CursedPaint.PlaceholderImage
+local CursedPaint = loadstring(game:HttpGet("https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/loader.lua"))()
+local DemoImage = CursedPaint:GetPlaceholderImage()
 
 local Window = CursedPaint:CreateWindow({
 	Title = "CursedPaint",
-	Theme = "Paper",
-	Size = UDim2.fromOffset(650, 370),
-	SideImage = PlaceholderImage,
+	Theme = "Dark",
+	Size = UDim2.fromOffset(690, 395),
+	MinSize = Vector2.new(520, 320),
+	Resizable = true,
+	SideImage = DemoImage,
 	SideImageTransparency = 0.78,
 	ToggleKey = Enum.KeyCode.RightControl,
 })
@@ -17,34 +19,34 @@ local Main = Window:AddTab("Main")
 local Controls = Window:AddTab("Controls")
 local Combat = Window:AddTab("Combat")
 local Visuals = Window:AddTab("Visuals")
-local Config = Window:AddTab("Config")
+local Settings = Window:AddTab("Settings")
 local Daily = Window:AddTab("Daily")
 Window:AddTab("-")
 
 Main:AddSection("CursedPaint UI")
 Main:AddBanner({
-	Title = "Paper Menu Library",
-	Caption = "Replace this image with any Roblox asset id.",
-	Image = PlaceholderImage,
+	Title = "Dark Sketch Menu",
+	Caption = "Rounded, draggable, resizable, and built for quick Luau panels.",
+	Image = DemoImage,
 	ImageTransparency = 0.18,
 })
 Main:AddParagraph({
-	Title = "Testing Library",
-	Content = "A real control library with a flat paper menu style, FingerPaint text, image rows, tabs, callbacks, flags, config, and notifications.",
+	Title = "What this is",
+	Content = "A simple Roblox Luau UI library with tabs, flags, config, images, notifications, and script-friendly controls.",
 })
 Main:AddButton({
 	Title = "Notification",
-	Description = "Shows a paper-style popup.",
+	Description = "Shows a themed popup.",
 	ButtonText = "SHOW",
-	Icon = PlaceholderImage,
+	Icon = DemoImage,
 	Callback = function()
 		Window:Notify({
 			Title = "CursedPaint",
-			Content = "Button callbacks work.",
+			Content = "Button callbacks are working.",
 		})
 	end,
 })
-Main:AddDivider("Status")
+Main:AddDivider("State")
 local Status = Main:AddLabel("Ready.")
 Main:AddProgress({
 	Title = "Total Progress",
@@ -58,7 +60,7 @@ Controls:AddToggle({
 	Description = "Boolean flag example.",
 	Flag = "auto_sprint",
 	Default = true,
-	Icon = PlaceholderImage,
+	Icon = DemoImage,
 	Callback = function(value)
 		Status:Set("Auto Sprint: " .. tostring(value))
 	end,
@@ -140,26 +142,17 @@ Combat:AddButton({
 Visuals:AddSection("Visuals")
 Visuals:AddImage({
 	Title = "Image Row",
-	Caption = "Use AddImage or AddBanner for big art blocks.",
-	Image = PlaceholderImage,
+	Caption = "Use an rbxassetid, rbxasset URL, or HTTP image with executor file APIs.",
+	Image = DemoImage,
 	Height = 120,
 	ImageTransparency = 0.08,
 })
 Visuals:AddColorPicker({
-	Title = "Bar Color",
-	Flag = "bar_color",
-	Default = Color3.fromRGB(21, 205, 244),
+	Title = "Accent Color",
+	Flag = "accent_color",
+	Default = Color3.fromRGB(26, 203, 246),
 	Callback = function(color)
 		Status:Set("Picked color: " .. tostring(color))
-	end,
-})
-Visuals:AddDropdown({
-	Title = "Theme",
-	Flag = "theme_select",
-	Options = { "Paper", "Smoke", "Blood", "Void", "Forest", "Candy" },
-	Default = "Paper",
-	Callback = function(theme)
-		Window:SetTheme(theme)
 	end,
 })
 Visuals:AddButton({
@@ -167,21 +160,42 @@ Visuals:AddButton({
 	Description = "Changes the faded image on the right side.",
 	ButtonText = "SET",
 	Callback = function()
-		Window:SetSideImage(PlaceholderImage, 0.6)
+		Window:SetSideImage(DemoImage, 0.66)
 		Status:Set("Side image changed.")
 	end,
 })
-Visuals:AddKeybind({
-	Title = "Toggle UI",
-	Flag = "toggle_key",
-	Default = Enum.KeyCode.RightControl,
-	Pressed = function()
-		Window:SetVisible(false)
+
+Settings:AddSection("Settings")
+Settings:AddDropdown({
+	Title = "Theme",
+	Flag = "theme_select",
+	Options = Window:GetThemes(),
+	Default = "Dark",
+	Callback = function(theme)
+		Window:SetTheme(theme)
 	end,
 })
-
-Config:AddSection("Config")
-Config:AddButton({
+Settings:AddDropdown({
+	Title = "Font",
+	Flag = "font_select",
+	Options = { "FingerPaint", "Cartoon", "GothamBold", "Gotham" },
+	Default = "FingerPaint",
+	Callback = function(font)
+		Window:SetFont(font)
+	end,
+})
+Settings:AddKeybind({
+	Title = "Notify Key",
+	Flag = "notify_key",
+	Default = Enum.KeyCode.RightShift,
+	Pressed = function(key)
+		Window:Notify({
+			Title = "Keybind",
+			Content = key.Name .. " pressed.",
+		})
+	end,
+})
+Settings:AddButton({
 	Title = "Save Config",
 	Description = "Uses writefile if available, memory fallback otherwise.",
 	ButtonText = "SAVE",
@@ -193,7 +207,7 @@ Config:AddButton({
 		})
 	end,
 })
-Config:AddButton({
+Settings:AddButton({
 	Title = "Load Config",
 	Description = "Restores flags and theme.",
 	ButtonText = "LOAD",
@@ -205,27 +219,27 @@ Config:AddButton({
 		})
 	end,
 })
-Config:AddLabel("RightControl toggles the UI.")
+Settings:AddLabel("Drag the bottom-right handle to resize. RightControl toggles the UI.")
 
 Daily:AddQuest({
 	Title = "Roll 15 times",
 	Value = 0,
 	Max = 15,
-	Image = PlaceholderImage,
+	Image = DemoImage,
 	ImageTransparency = 0.72,
 })
 Daily:AddQuest({
 	Title = "Use Special 15 times",
 	Value = 3,
 	Max = 15,
-	Image = PlaceholderImage,
+	Image = DemoImage,
 	ImageTransparency = 0.78,
 })
 Daily:AddQuest({
 	Title = "Play for 15 minutes",
 	Value = 8,
 	Max = 15,
-	Image = PlaceholderImage,
+	Image = DemoImage,
 	ImageTransparency = 0.82,
 })
 Daily:AddLabel("Refreshes in: 7h 29m 23s")
@@ -237,6 +251,6 @@ Daily:AddProgress({
 
 Window:Notify({
 	Title = "CursedPaint",
-	Content = "Full UI library showcase loaded.",
+	Content = "Showcase loaded.",
 	Duration = 3,
 })
