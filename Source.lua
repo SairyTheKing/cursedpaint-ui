@@ -3,7 +3,7 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.6.0"
+CursedPaint.Version = "0.6.1"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
 CursedPaint.Motion = {
@@ -13,10 +13,10 @@ CursedPaint.Motion = {
 
 CursedPaint.Themes = {
 	Brawl = {
-		Backdrop = Color3.fromRGB(35, 35, 38),
-		Left = Color3.fromRGB(232, 226, 176),
-		Panel = Color3.fromRGB(238, 238, 231),
-		PanelAlt = Color3.fromRGB(204, 205, 199),
+		Backdrop = Color3.fromRGB(39, 39, 42),
+		Left = Color3.fromRGB(238, 234, 194),
+		Panel = Color3.fromRGB(244, 244, 238),
+		PanelAlt = Color3.fromRGB(211, 212, 206),
 		Text = Color3.fromRGB(13, 13, 13),
 		Muted = Color3.fromRGB(47, 47, 47),
 		Ink = Color3.fromRGB(0, 0, 0),
@@ -26,10 +26,10 @@ CursedPaint.Themes = {
 		BarFill = Color3.fromRGB(18, 203, 245),
 		Good = Color3.fromRGB(69, 190, 102),
 		Bad = Color3.fromRGB(220, 67, 70),
-		PanelTransparency = 0.16,
-		RowTransparency = 0.08,
-		TextureTransparency = 0.8,
-		GlowTransparency = 0.78,
+		PanelTransparency = 0.08,
+		RowTransparency = 0.04,
+		TextureTransparency = 0.9,
+		GlowTransparency = 0.9,
 		Radius = 9,
 		StrokeThickness = 1.8,
 	},
@@ -344,31 +344,71 @@ local function grid(parent, cellSize, gap)
 end
 
 local function tween(instance, duration, goal)
+	if not instance then
+		return nil
+	end
+
 	local speed = CursedPaint.Motion and tonumber(CursedPaint.Motion.Speed) or 1
 	if speed <= 0 then
 		speed = 1
 	end
-	local tweenService = service("TweenService")
-	local info = TweenInfo.new((duration or 0.12) / speed, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local created = tweenService:Create(instance, info, goal)
-	created:Play()
-	return created
+
+	local ok, created = pcall(function()
+		local tweenService = service("TweenService")
+		local info = TweenInfo.new((duration or 0.12) / speed, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		return tweenService:Create(instance, info, goal)
+	end)
+
+	if ok and created then
+		pcall(function()
+			created:Play()
+		end)
+		return created
+	end
+
+	for key, value in pairs(goal or {}) do
+		pcall(function()
+			instance[key] = value
+		end)
+	end
+
+	return nil
 end
 
 local function tweenStyle(instance, duration, goal, style, direction)
+	if not instance then
+		return nil
+	end
+
 	local speed = CursedPaint.Motion and tonumber(CursedPaint.Motion.Speed) or 1
 	if speed <= 0 then
 		speed = 1
 	end
-	local tweenService = service("TweenService")
-	local info = TweenInfo.new(
-		(duration or 0.12) / speed,
-		style or Enum.EasingStyle.Quad,
-		direction or Enum.EasingDirection.Out
-	)
-	local created = tweenService:Create(instance, info, goal)
-	created:Play()
-	return created
+
+	local ok, created = pcall(function()
+		local tweenService = service("TweenService")
+		local info = TweenInfo.new(
+			(duration or 0.12) / speed,
+			style or Enum.EasingStyle.Quad,
+			direction or Enum.EasingDirection.Out
+		)
+		return tweenService:Create(instance, info, goal)
+	end)
+
+	if ok and created then
+		pcall(function()
+			created:Play()
+		end)
+		return created
+	end
+
+	for key, value in pairs(goal or {}) do
+		pcall(function()
+			instance[key] = value
+		end)
+	end
+
+	return nil
 end
 
 local function motionEnabled()
@@ -389,6 +429,20 @@ local function popScale(scaleObject, amount)
 
 	scaleObject.Scale = amount or 0.97
 	tweenStyle(scaleObject, 0.18, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+end
+
+local function setButtonRestTransparency(button, value)
+	pcall(function()
+		button:SetAttribute("CursedPaintRestTransparency", value)
+	end)
+end
+
+local function getButtonRestTransparency(button, fallback)
+	local ok, value = pcall(function()
+		return button:GetAttribute("CursedPaintRestTransparency")
+	end)
+
+	return (ok and tonumber(value)) or fallback or 0
 end
 
 local function call(callback, ...)
@@ -641,17 +695,18 @@ local function makeButton(parent, text, theme, width)
 	applyHandFont(button)
 	corner(button, theme)
 	stroke(button, theme, 2)
+	setButtonRestTransparency(button, theme.RowTransparency)
 	local scale = addScale(button, 1)
 
 	button.MouseEnter:Connect(function()
 		tween(button, 0.1, { BackgroundTransparency = 0.02 })
 		if motionEnabled() then
-			tweenStyle(scale, 0.12, { Scale = 1.035 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			tweenStyle(scale, 0.1, { Scale = 1.018 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 		end
 	end)
 
 	button.MouseLeave:Connect(function()
-		tween(button, 0.1, { BackgroundTransparency = theme.RowTransparency })
+		tween(button, 0.1, { BackgroundTransparency = getButtonRestTransparency(button, theme.RowTransparency) })
 		if motionEnabled() then
 			tween(scale, 0.1, { Scale = 1 })
 		end
@@ -659,13 +714,13 @@ local function makeButton(parent, text, theme, width)
 
 	button.MouseButton1Down:Connect(function()
 		if motionEnabled() then
-			tween(scale, 0.06, { Scale = 0.95 })
+			tween(scale, 0.06, { Scale = 0.975 })
 		end
 	end)
 
 	button.MouseButton1Up:Connect(function()
 		if motionEnabled() then
-			tweenStyle(scale, 0.12, { Scale = 1.02 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			tweenStyle(scale, 0.1, { Scale = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 		end
 	end)
 
@@ -748,6 +803,7 @@ function CursedPaint:CreateWindow(options)
 		BackgroundColor3 = theme.Backdrop,
 		BackgroundTransparency = theme.PanelTransparency,
 		BorderSizePixel = 0,
+		ClipsDescendants = true,
 		Position = options.Position or UDim2.fromScale(0.5, 0.5),
 		Size = options.Size or UDim2.fromOffset(780, 460),
 		ZIndex = 1,
@@ -856,7 +912,7 @@ function CursedPaint:CreateWindow(options)
 		Position = UDim2.new(1, -4, 0, 0),
 		ScaleType = Enum.ScaleType.Crop,
 		Size = UDim2.new(0, options.SideImageWidth or 190, 1, 0),
-		ZIndex = 3,
+		ZIndex = 1,
 	})
 	if sideImage then
 		corner(sideImage, theme, math.max((theme.Radius or 7) - 2, 2))
@@ -916,6 +972,7 @@ function CursedPaint:CreateWindow(options)
 		BackgroundTransparency = 1,
 		Position = UDim2.new(1, -330, 0, 16),
 		Size = UDim2.fromOffset(310, 330),
+		ZIndex = 50,
 		Parent = gui,
 	})
 	local toastLayout = list(toastHolder, 8)
@@ -949,6 +1006,7 @@ function CursedPaint:CreateWindow(options)
 		Flags = {},
 		_flagSetters = {},
 		_themeBindings = {},
+		_connections = {},
 		_tabs = {},
 		_tabButtons = {},
 		_activeTab = nil,
@@ -990,13 +1048,16 @@ function CursedPaint:CreateWindow(options)
 		})
 		close.BackgroundColor3 = nextTheme.Panel
 		close.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(close, nextTheme.RowTransparency)
 		close.TextColor3 = nextTheme.Text
 		minimize.BackgroundColor3 = nextTheme.Panel
 		minimize.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(minimize, nextTheme.RowTransparency)
 		minimize.TextColor3 = nextTheme.Text
 		if resizeGrip then
 			resizeGrip.BackgroundColor3 = nextTheme.Panel
 			resizeGrip.BackgroundTransparency = nextTheme.RowTransparency
+			setButtonRestTransparency(resizeGrip, nextTheme.RowTransparency)
 			resizeGrip.TextColor3 = nextTheme.Text
 			updateStroke(resizeGrip, nextTheme)
 			updateCorner(resizeGrip, nextTheme)
@@ -1047,11 +1108,11 @@ function CursedPaint:CreateWindow(options)
 
 	local userInput = service("UserInputService")
 	if options.ToggleKey then
-		userInput.InputBegan:Connect(function(input, gameProcessed)
+		self:_track(userInput.InputBegan:Connect(function(input, gameProcessed)
 			if not gameProcessed and input.KeyCode == options.ToggleKey then
 				self:SetVisible(not self._visible)
 			end
-		end)
+		end))
 	end
 
 	return self
@@ -1069,6 +1130,10 @@ function Window:_applyTheme()
 end
 
 function Window:SetTheme(name)
+	if self._destroyed then
+		return false
+	end
+
 	if not CursedPaint.Themes[name] then
 		return false
 	end
@@ -1078,6 +1143,22 @@ function Window:SetTheme(name)
 	self.Flags.__theme = name
 	self:_applyTheme()
 	return true
+end
+
+function Window:_track(connection)
+	if connection then
+		table.insert(self._connections, connection)
+	end
+	return connection
+end
+
+function Window:_disconnectAll()
+	for _, connection in ipairs(self._connections or {}) do
+		pcall(function()
+			connection:Disconnect()
+		end)
+	end
+	self._connections = {}
 end
 
 function CursedPaint:SetFont(font, fontFace)
@@ -1159,6 +1240,10 @@ function CursedPaint:DownloadImage(url, fileName)
 end
 
 function Window:SetBackgroundImage(image, transparency)
+	if self._destroyed then
+		return nil
+	end
+
 	local normalized = normalizeImage(image)
 	if not normalized then
 		if self.BackgroundImage then
@@ -1188,6 +1273,10 @@ function Window:SetBackgroundImage(image, transparency)
 end
 
 function Window:SetSideImage(image, transparency)
+	if self._destroyed then
+		return nil
+	end
+
 	local normalized = normalizeImage(image)
 	if not normalized then
 		if self.SideImage then
@@ -1204,7 +1293,7 @@ function Window:SetSideImage(image, transparency)
 			Position = UDim2.new(1, -4, 0, 0),
 			ScaleType = Enum.ScaleType.Crop,
 			Size = UDim2.new(0, 155, 1, 0),
-			ZIndex = 3,
+			ZIndex = 1,
 		})
 		if self.SideImage then
 			corner(self.SideImage, self.Theme, math.max((self.Theme.Radius or 7) - 2, 2))
@@ -1222,6 +1311,10 @@ function Window:GetThemes()
 end
 
 function Window:SetVisible(visible)
+	if self._destroyed then
+		return
+	end
+
 	self._visible = visible == true
 	if self._visible then
 		self.Root.Visible = true
@@ -1247,6 +1340,10 @@ function Window:SetVisible(visible)
 end
 
 function Window:SetMinimized(minimized)
+	if self._destroyed then
+		return
+	end
+
 	self._minimized = minimized == true
 	if self._minimized then
 		self.Left.Visible = false
@@ -1266,6 +1363,11 @@ function Window:SetMinimized(minimized)
 end
 
 function Window:Destroy()
+	if self._destroyed then
+		return
+	end
+	self._destroyed = true
+	self:_disconnectAll()
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
 	end
@@ -1277,7 +1379,10 @@ function Window:_makeDraggable(handle, target)
 	local dragStart
 	local startPos
 
-	handle.InputBegan:Connect(function(input)
+	self:_track(handle.InputBegan:Connect(function(input)
+		if self._destroyed or self._resizing then
+			return
+		end
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
 			dragStart = input.Position
@@ -1288,9 +1393,9 @@ function Window:_makeDraggable(handle, target)
 				end
 			end)
 		end
-	end)
+	end))
 
-	userInput.InputChanged:Connect(function(input)
+	self:_track(userInput.InputChanged:Connect(function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			local delta = input.Position - dragStart
 			target.Position = UDim2.new(
@@ -1300,7 +1405,7 @@ function Window:_makeDraggable(handle, target)
 				startPos.Y.Offset + delta.Y
 			)
 		end
-	end)
+	end))
 end
 
 function Window:_makeResizable(handle, target, minSize)
@@ -1310,20 +1415,25 @@ function Window:_makeResizable(handle, target, minSize)
 	local startSize
 	minSize = minSize or Vector2.new(480, 300)
 
-	handle.InputBegan:Connect(function(input)
+	self:_track(handle.InputBegan:Connect(function(input)
+		if self._destroyed then
+			return
+		end
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			resizing = true
+			self._resizing = true
 			resizeStart = input.Position
 			startSize = target.Size
 			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
 					resizing = false
+					self._resizing = false
 				end
 			end)
 		end
-	end)
+	end))
 
-	userInput.InputChanged:Connect(function(input)
+	self:_track(userInput.InputChanged:Connect(function(input)
 		if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			local delta = input.Position - resizeStart
 			local startWidth = startSize.X.Offset ~= 0 and startSize.X.Offset or target.AbsoluteSize.X
@@ -1334,7 +1444,7 @@ function Window:_makeResizable(handle, target, minSize)
 			target.Size = nextSize
 			self._normalSize = nextSize
 		end
-	end)
+	end))
 end
 
 function Window:CreateTab(title, icon)
@@ -1348,6 +1458,7 @@ function Window:CreateTab(title, icon)
 		ScrollBarThickness = 3,
 		Size = UDim2.fromScale(1, 1),
 		Visible = false,
+		ZIndex = 5,
 		Parent = self.Content,
 	})
 	local pageScale = addScale(page, 1)
@@ -1454,6 +1565,10 @@ function Window:_registerFlag(flag, setter)
 end
 
 function Window:Notify(options)
+	if self._destroyed then
+		return nil
+	end
+
 	options = options or {}
 	local theme = self.Theme
 	local toast = make("Frame", {
@@ -1461,6 +1576,7 @@ function Window:Notify(options)
 		BackgroundTransparency = theme.RowTransparency,
 		BorderSizePixel = 0,
 		Size = UDim2.fromOffset(310, 76),
+		ZIndex = 51,
 		Parent = self.ToastHolder,
 	})
 	corner(toast, theme)
@@ -1473,6 +1589,7 @@ function Window:Notify(options)
 		BorderSizePixel = 0,
 		Position = UDim2.new(0, 8, 1, -7),
 		Size = UDim2.new(1, -16, 0, 4),
+		ZIndex = 52,
 		Parent = toast,
 	})
 	corner(accent, theme, 3)
@@ -1482,6 +1599,7 @@ function Window:Notify(options)
 		Text = options.Title or "Notice",
 		TextColor3 = theme.Text,
 		Size = UDim2.new(1, 0, 0, 25),
+		ZIndex = 52,
 		Parent = toast,
 	})
 	setHandText(title, 18)
@@ -1497,6 +1615,7 @@ function Window:Notify(options)
 		TextYAlignment = Enum.TextYAlignment.Top,
 		Position = UDim2.fromOffset(0, 29),
 		Size = UDim2.new(1, 0, 1, -30),
+		ZIndex = 52,
 		Parent = toast,
 	})
 
@@ -1538,15 +1657,12 @@ function Window:SaveConfig(name)
 
 	local savedToFile = false
 	pcall(function()
-		if makefolder then
-			local folderExists = false
-			if isfolder then
-				folderExists = isfolder(self._configFolder)
-			end
-			if not folderExists then
-				makefolder(self._configFolder)
-			end
+		if makefolder and (not isfolder or not isfolder(self._configFolder)) then
+			makefolder(self._configFolder)
 		end
+	end)
+
+	pcall(function()
 		if writefile then
 			writefile(self._configFolder .. "/" .. configName .. ".json", payload)
 			savedToFile = true
@@ -1609,6 +1725,7 @@ function Tab:_row(height)
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
 		Size = UDim2.new(1, 0, 0, height or 58),
+		ZIndex = 6,
 		Parent = self.Page,
 	})
 	corner(row, theme)
@@ -2009,6 +2126,7 @@ function Tab:Button(options)
 		title.TextColor3 = nextTheme.Text
 		button.BackgroundColor3 = nextTheme.Panel
 		button.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(button, nextTheme.RowTransparency)
 		button.TextColor3 = nextTheme.Text
 		updateStroke(button, nextTheme)
 		if desc then
@@ -2061,6 +2179,7 @@ function Tab:Toggle(options)
 		button.Text = boolText(value)
 		button.BackgroundColor3 = value and self.Window.Theme.BarFill or self.Window.Theme.PanelAlt
 		button.BackgroundTransparency = 0.05
+		setButtonRestTransparency(button, 0.05)
 		if not silent then
 			call(options.Callback, value)
 		end
@@ -2077,6 +2196,8 @@ function Tab:Toggle(options)
 		title.TextColor3 = nextTheme.Text
 		button.TextColor3 = nextTheme.Text
 		button.BackgroundColor3 = value and nextTheme.BarFill or nextTheme.PanelAlt
+		button.BackgroundTransparency = 0.05
+		setButtonRestTransparency(button, 0.05)
 		updateStroke(button, nextTheme)
 		if desc then
 			desc.TextColor3 = nextTheme.Muted
@@ -2100,6 +2221,9 @@ function Tab:Slider(options)
 	local theme = self.Window.Theme
 	local minValue = tonumber(options.Min) or 0
 	local maxValue = tonumber(options.Max) or 100
+	if maxValue < minValue then
+		minValue, maxValue = maxValue, minValue
+	end
 	local step = tonumber(options.Step) or 1
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = roundToStep(clampNumber(options.Default or minValue, minValue, maxValue), step)
@@ -2144,17 +2268,17 @@ function Tab:Slider(options)
 		end
 	end)
 
-	userInput.InputChanged:Connect(function(input)
+	self.Window:_track(userInput.InputChanged:Connect(function(input)
 		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 			readPosition(input.Position.X)
 		end
-	end)
+	end))
 
-	userInput.InputEnded:Connect(function(input)
+	self.Window:_track(userInput.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = false
 		end
-	end)
+	end))
 
 	self.Window:_registerFlag(flag, set)
 	set(value, true)
@@ -2184,6 +2308,9 @@ function Tab:Stepper(options)
 	local theme = self.Window.Theme
 	local minValue = tonumber(options.Min) or 0
 	local maxValue = tonumber(options.Max) or 10
+	if maxValue < minValue then
+		minValue, maxValue = maxValue, minValue
+	end
 	local step = tonumber(options.Step) or 1
 	local flag = normalizeFlag(options.Title, options.Flag)
 	local value = roundToStep(clampNumber(options.Default or minValue, minValue, maxValue), step)
@@ -2238,10 +2365,14 @@ function Tab:Stepper(options)
 	self.Window:_bindTheme(function(nextTheme)
 		title.TextColor3 = nextTheme.Text
 		minus.BackgroundColor3 = nextTheme.Panel
+		minus.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(minus, nextTheme.RowTransparency)
 		minus.TextColor3 = nextTheme.Text
 		valueLabel.BackgroundColor3 = nextTheme.PanelAlt
 		valueLabel.TextColor3 = nextTheme.Text
 		plus.BackgroundColor3 = nextTheme.Panel
+		plus.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(plus, nextTheme.RowTransparency)
 		plus.TextColor3 = nextTheme.Text
 		updateStroke(minus, nextTheme)
 		updateStroke(valueLabel, nextTheme)
@@ -2339,6 +2470,7 @@ function Tab:Dropdown(options)
 		title.TextColor3 = nextTheme.Text
 		button.BackgroundColor3 = nextTheme.Panel
 		button.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(button, nextTheme.RowTransparency)
 		button.TextColor3 = nextTheme.Text
 		menu.BackgroundColor3 = nextTheme.Panel
 		updateStroke(button, nextTheme)
@@ -2486,6 +2618,7 @@ function Tab:MultiDropdown(options)
 		title.TextColor3 = nextTheme.Text
 		button.BackgroundColor3 = nextTheme.Panel
 		button.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(button, nextTheme.RowTransparency)
 		button.TextColor3 = nextTheme.Text
 		menu.BackgroundColor3 = nextTheme.Panel
 		updateStroke(button, nextTheme)
@@ -2603,7 +2736,11 @@ function Tab:Keybind(options)
 		button.Text = "..."
 	end)
 
-	service("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+	self.Window:_track(service("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+		if self.Window._destroyed then
+			return
+		end
+
 		if listening and input.KeyCode ~= Enum.KeyCode.Unknown then
 			listening = false
 			set(input.KeyCode)
@@ -2613,7 +2750,7 @@ function Tab:Keybind(options)
 		if not gameProcessed and input.KeyCode == value then
 			call(options.Pressed, value)
 		end
-	end)
+	end))
 
 	self.Window:_registerFlag(flag, set)
 	set(value, true)
@@ -2622,6 +2759,7 @@ function Tab:Keybind(options)
 		title.TextColor3 = nextTheme.Text
 		button.BackgroundColor3 = nextTheme.Panel
 		button.BackgroundTransparency = nextTheme.RowTransparency
+		setButtonRestTransparency(button, nextTheme.RowTransparency)
 		button.TextColor3 = nextTheme.Text
 		updateStroke(button, nextTheme)
 	end)
@@ -2650,6 +2788,9 @@ function Tab:ColorPicker(options)
 		Color3.fromRGB(142, 113, 255),
 		Color3.fromRGB(255, 255, 255),
 	}
+	if #colors == 0 then
+		colors = { Color3.fromRGB(255, 255, 255) }
+	end
 	local value = options.Default or colors[1]
 	local row = self:_row(70)
 	local title = rowTitle(row, options.Title or "Color", theme, 2, 16)

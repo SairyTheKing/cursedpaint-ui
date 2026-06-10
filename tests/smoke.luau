@@ -23,7 +23,7 @@ assert(library.Themes.Dark ~= nil, "Dark theme is missing")
 assert(library.Themes.Paper ~= nil, "Paper theme is missing")
 assert(library.Themes.Blood ~= nil, "Blood theme is missing")
 assert(library.Themes.Void ~= nil, "Void theme is missing")
-assert(library.Version == "0.6.0", "Version should be 0.6.0")
+assert(library.Version == "0.6.1", "Version should be 0.6.1")
 assert(type(library.SetMotion) == "function", "SetMotion is missing")
 
 local loader = fs.readFile("loader.lua")
