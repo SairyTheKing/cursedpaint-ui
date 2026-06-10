@@ -4,7 +4,7 @@
 
 CursedPaint UI is a simple Roblox Luau UI library for testing panels, script menus, settings pages, and showcase interfaces.
 
-It uses one JJS-style sketch-menu theme by default: thick black outlines, pale side tabs, white paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint text is attempted through Roblox `Font.fromName`, family paths, and enum fallback.
+It uses one JJS-style sketch-menu theme by default: thick black outlines, pale side tabs, white paper panels, yellow-orange selected tabs, and cyan progress bars. FingerPaint text is attempted through the bundled GitHub `.ttf`, Roblox `Font.fromName`, family paths, and enum fallback.
 
 ## Load
 
@@ -56,7 +56,7 @@ Main:AddSlider({
 
 - One default `JJS` sketch theme.
 - Thick black outlines across windows, tabs, rows, buttons, inputs, and bars.
-- FingerPaint loader on every text object, with custom font asset support and Roblox fallback.
+- Bundled `FingerPaint-Regular.ttf` loader on every text object, with custom font asset support and Roblox fallback.
 - Draggable, minimizable, closable, toggleable, and resizable window.
 - Animated opening, tab switching, toasts, rows, buttons, and progress bars.
 - Tabs, sections, labels, paragraphs, images, banners, quests, and progress bars.
@@ -96,7 +96,13 @@ Window:SetFont("FingerPaint")
 print(CursedPaint:GetFontStatus().Method)
 ```
 
-If your client still shows a normal Roblox font, the executor/client is probably missing that font family. Import a font asset and use:
+CursedPaint automatically tries to download:
+
+```lua
+print(CursedPaint.FontFileUrl)
+```
+
+This needs executor file APIs: `writefile` and `getcustomasset`. If your client still shows a normal Roblox font, upload/import the font to Roblox and use:
 
 ```lua
 Window:SetFont("rbxassetid://YOUR_FONT_ASSET_ID")

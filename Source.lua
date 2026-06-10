@@ -3,12 +3,15 @@
 
 local CursedPaint = {}
 CursedPaint.__index = CursedPaint
-CursedPaint.Version = "0.7.1"
+CursedPaint.Version = "0.7.2"
 CursedPaint.PlaceholderImage = "cursedpaint://placeholder"
 CursedPaint._imageCache = {}
+CursedPaint._downloadedFontAssets = {}
 CursedPaint._fontFaceCache = {}
 CursedPaint.Font = "FingerPaint"
 CursedPaint.FontFace = nil
+CursedPaint.FontFile = "FingerPaint-Regular.ttf"
+CursedPaint.FontFileUrl = "https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/FingerPaint-Regular.ttf"
 CursedPaint._fontStatus = {
 	Requested = "FingerPaint",
 	Resolved = false,
@@ -111,6 +114,12 @@ local FONT_NAME_ALIASES = {
 	permanentmarker = { "Permanent Marker", "PermanentMarker" },
 }
 
+local FONT_DOWNLOADS = {
+	fingerpaint = {
+		"https://raw.githubusercontent.com/SairyTheKing/cursedpaint-ui/main/FingerPaint-Regular.ttf",
+	},
+}
+
 local FONT_FAMILY_PATHS = {
 	fingerpaint = {
 		"rbxasset://fonts/families/FingerPaint.json",
@@ -129,6 +138,15 @@ local FONT_FAMILY_PATHS = {
 
 local function fontLookupKey(value)
 	return tostring(value or ""):gsub("[%s_%-]+", ""):lower()
+end
+
+local function jsonString(value)
+	local text = tostring(value or "")
+	text = text:gsub("\\", "\\\\")
+	text = text:gsub('"', '\\"')
+	text = text:gsub("\n", "\\n")
+	text = text:gsub("\r", "\\r")
+	return '"' .. text .. '"'
 end
 
 local function setFontStatus(requested, resolved, method, value)
@@ -177,6 +195,10 @@ local function fontCandidates(value)
 	end
 
 	local key = fontLookupKey(text)
+	for _, url in ipairs(FONT_DOWNLOADS[key] or {}) do
+		addFontCandidate(candidates, seen, "download", url)
+	end
+
 	local aliases = FONT_NAME_ALIASES[key] or { text }
 	for _, name in ipairs(aliases) do
 		addFontCandidate(candidates, seen, "name", name)
@@ -260,6 +282,117 @@ local function fontFromPath(path, requested)
 	return nil
 end
 
+local function ensureFontAssetFolder()
+	pcall(function()
+		if makefolder and (not isfolder or not isfolder("CursedPaintUI")) then
+			makefolder("CursedPaintUI")
+		end
+	end)
+
+	pcall(function()
+		if makefolder and (not isfolder or not isfolder("CursedPaintUI/fonts")) then
+			makefolder("CursedPaintUI/fonts")
+		end
+	end)
+end
+
+local function downloadedFontAssets(url)
+	local text = tostring(url or "")
+	if text == "" then
+		return nil
+	end
+
+	if CursedPaint._downloadedFontAssets[text] then
+		return CursedPaint._downloadedFontAssets[text]
+	end
+
+	local ok, assets = pcall(function()
+		if not writefile or not getcustomasset then
+			return nil
+		end
+
+		ensureFontAssetFolder()
+
+		local safeName = tostring(text:match("([^/%?#]+)[%?#]?$") or CursedPaint.FontFile or "font.ttf")
+		safeName = safeName:gsub("[^%w%._%-]", "_")
+		if not safeName:match("%.ttf$") and not safeName:match("%.otf$") then
+			safeName = safeName .. ".ttf"
+		end
+
+		local fontPath = "CursedPaintUI/fonts/" .. safeName
+		local shouldDownload = true
+		pcall(function()
+			if isfile and isfile(fontPath) then
+				shouldDownload = false
+			end
+		end)
+
+		if shouldDownload then
+			local bytes = game:HttpGet(text)
+			if not bytes or bytes == "" then
+				return nil
+			end
+			writefile(fontPath, bytes)
+		end
+
+		local fontAsset = getcustomasset(fontPath)
+		if not fontAsset then
+			return nil
+		end
+
+		local familyName = safeName:gsub("%.%w+$", "")
+		local familyPath = "CursedPaintUI/fonts/" .. familyName .. ".family.json"
+		local familyJson = "{"
+			.. '"name":' .. jsonString(familyName) .. ","
+			.. '"faces":[{'
+			.. '"name":"Regular",'
+			.. '"weight":400,'
+			.. '"style":"normal",'
+			.. '"assetId":' .. jsonString(fontAsset)
+			.. "}]"
+			.. "}"
+		writefile(familyPath, familyJson)
+
+		local familyAsset = getcustomasset(familyPath)
+		return {
+			File = fontAsset,
+			Family = familyAsset,
+		}
+	end)
+
+	if ok and assets then
+		CursedPaint._downloadedFontAssets[text] = assets
+		return assets
+	end
+
+	return nil
+end
+
+local function fontFromDownloadedUrl(url, requested)
+	local assets = downloadedFontAssets(url)
+	if not assets then
+		return nil
+	end
+
+	if assets.Family then
+		local face = fontFromPath(assets.Family, requested)
+		if face then
+			setFontStatus(requested, true, "GitHub .ttf family", url)
+			return face
+		end
+	end
+
+	if assets.File then
+		local face = fontFromPath(assets.File, requested)
+		if face then
+			setFontStatus(requested, true, "GitHub .ttf file", url)
+			return face
+		end
+	end
+
+	return nil
+end
+
 local function resolveFontFace(value)
 	local kind = kindOf(value)
 	if kind == "Font" then
@@ -293,6 +426,8 @@ local function resolveFontFace(value)
 
 		if candidate.Kind == "name" then
 			face = fontFromName(candidate.Value, value)
+		elseif candidate.Kind == "download" then
+			face = fontFromDownloadedUrl(candidate.Value, value)
 		elseif candidate.Kind == "path" then
 			face = fontFromPath(candidate.Value, value)
 		end
@@ -382,7 +517,7 @@ function CursedPaint:GetFontStatus()
 end
 
 function CursedPaint:GetFontHelp()
-	return "If FingerPaint falls back on your client, import a font and call Window:SetFont(\"rbxassetid://YOUR_FONT_ASSET_ID\")."
+	return "CursedPaint downloads FingerPaint-Regular.ttf from GitHub when writefile/getcustomasset exist. For normal Roblox games, upload the font to Roblox and call Window:SetFont(\"rbxassetid://YOUR_FONT_ASSET_ID\")."
 end
 
 local function bodyFont()
